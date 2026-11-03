@@ -1,0 +1,839 @@
+<title>เดโมระบบลงเวลาครู MallsofT</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=Sarabun:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: page header + demo controls, then a swipeable track of phone mockups (1 per view on phones, 2 per view on tablets) */
+:root{
+  --bg:#EEF0F3; --panel:#FFFFFF; --fg:#1B2530; --mut:#5E6873; --line:#D9DEE4; --accent:#F26A1B; --accent-ink:#B4480B; --chip:#E3E7EC;
+  --display:"Prompt","Sarabun","Leelawadee UI","Tahoma",sans-serif; --body:"Sarabun","Leelawadee UI","Tahoma",sans-serif;
+  /* app (inside the phones) always uses the product's own light palette */
+  --a-bg:#F6F7F9; --a-card:#FFFFFF; --a-ink:#1F2933; --a-mut:#6B7280; --a-line:#E5E7EB; --a-o:#F26A1B; --a-o2:#FFF1E8;
+  --ok:#16A34A; --ok2:#E8F7EE; --late:#D97706; --late2:#FEF3E2; --bad:#DC2626; --bad2:#FDECEC; --duty:#2563EB; --duty2:#EAF1FE; --leave:#7C3AED; --leave2:#F2ECFE; --wait:#6B7280; --wait2:#F0F1F3;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#11171D;--panel:#19212A;--fg:#E8ECF0;--mut:#9AA5B1;--line:#2A3540;--accent:#FF8A3D;--accent-ink:#FFB27F;--chip:#25303B;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11171D;--panel:#19212A;--fg:#E8ECF0;--mut:#9AA5B1;--line:#2A3540;--accent:#FF8A3D;--accent-ink:#FFB27F;--chip:#25303B;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 32px}
+button{font:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:6px 12px;min-width:0;flex-wrap:wrap}
+@media (max-width:520px){.brand img{height:24px}.ctl{gap:10px}}
+.brand img{height:30px;width:auto}
+:root .logo-dark{display:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .logo-light{display:none}:root:not([data-theme="light"]) .logo-dark{display:inline}}
+:root[data-theme="dark"] .logo-light{display:none}:root[data-theme="dark"] .logo-dark{display:inline}
+.brand h1{font:600 clamp(18px,3.2vw,24px)/1.2 var(--display);margin:0;text-wrap:balance}
+.brand p{margin:0;color:var(--mut);font-size:13.5px}
+.tag{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--accent-ink);border:1px solid currentColor;border-radius:99px;padding:2px 10px;white-space:nowrap}
+.ctl{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center}
+.ctl .grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.ctl .lbl{font-size:12.5px;color:var(--mut);font-weight:600;letter-spacing:.02em}
+.seg{display:inline-flex;background:var(--chip);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;color:var(--fg);padding:5px 10px;border-radius:8px;font-size:13.5px;font-variant-numeric:tabular-nums}
+.seg button[aria-pressed="true"]{background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.15);font-weight:700;color:var(--accent-ink)}
+.ghost{border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:10px;padding:6px 12px;font-size:13.5px}
+.roles{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.roles::-webkit-scrollbar{display:none}
+.rtab{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:99px;padding:7px 14px;font-size:14px;display:flex;align-items:center;gap:7px;position:relative}
+.rtab .d{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.rtab.on{border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.rtab.on .d{background:var(--accent)}
+.rtab .ping{position:absolute;top:-3px;right:-3px;width:11px;height:11px;border-radius:50%;background:var(--accent);border:2px solid var(--panel)}
+.stage{position:relative}
+.track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.track::-webkit-scrollbar{display:none}
+.slot{flex:0 0 100%;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:10px;padding:6px 4px 10px;min-width:0}
+@media (min-width:760px){.slot{flex-basis:50%}}
+.slot-h{text-align:center}
+.slot-h b{font:600 15px var(--display)}
+.slot-h span{display:block;color:var(--mut);font-size:12.5px}
+.nav-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--fg);display:none;place-items:center;z-index:5;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.nav-arrow.l{left:-6px}.nav-arrow.r{right:-6px}
+@media (min-width:760px){.nav-arrow{display:grid}}
+.nav-arrow[disabled]{opacity:.3;cursor:default}
+.dots{display:flex;justify-content:center;gap:6px}
+.dots i{width:7px;height:7px;border-radius:9px;background:var(--line);transition:width .2s}
+.dots i.on{width:20px;background:var(--accent)}
+.tips{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.tips h2{font:600 16px var(--display);margin:0 0 8px}
+.tips ol{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14px}
+.tips ol li::marker{color:var(--accent-ink);font-weight:700}
+.tips a{color:var(--accent-ink);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.foot{color:var(--mut);font-size:13px;text-align:center}
+
+/* ---------- phone mockup ---------- */
+.phone{position:relative;width:min(352px,100%);aspect-ratio:9/18.6;max-height:760px;background:#0E1114;border-radius:44px;padding:11px;box-shadow:0 18px 40px rgba(15,20,26,.28),inset 0 0 0 2px #2B3138}
+.phone .scr{position:relative;width:100%;height:100%;border-radius:34px;overflow:hidden;background:var(--a-bg);color:var(--a-ink);display:flex;flex-direction:column;font-family:var(--body);font-size:14px;line-height:1.45}
+.sbar{flex:none;height:30px;display:flex;align-items:center;justify-content:space-between;padding:0 22px 0 26px;font:600 12.5px var(--body);background:#fff;font-variant-numeric:tabular-nums}
+.sbar .isl{width:86px;height:22px;background:#0E1114;border-radius:20px}
+.sbar .sig{display:flex;gap:4px;align-items:center}
+.sbar .sig svg{width:16px;height:12px;fill:var(--a-ink)}
+.liff{flex:none;height:40px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#fff;border-bottom:1px solid var(--a-line);font-size:13px}
+.liff .x{font-size:18px;color:var(--a-mut);width:20px}
+.liff .tt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.liff .tt small{display:block;font-weight:400;color:var(--a-mut);font-size:10.5px;line-height:1}
+.screen{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.bnav{flex:none;display:flex;background:#fff;border-top:1px solid var(--a-line);padding:4px 4px 12px}
+.bnav button{flex:1;border:0;background:none;color:var(--a-mut);font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0}
+.bnav button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bnav button.on{color:var(--a-o);font-weight:700}
+
+/* app content */
+.pad{padding:12px;display:flex;flex-direction:column;gap:10px}
+.hero{background:linear-gradient(140deg,#FF8A3D,#F26A1B 55%,#D9530C);color:#fff;border-radius:18px;padding:14px 15px;position:relative;overflow:hidden}
+.hero.navy{background:linear-gradient(140deg,#2C3B4A,#1F2933)}
+.hero small{opacity:.85;font-size:12px}
+.hero .nm{font:600 17px/1.3 var(--display);margin-top:2px}
+.hero .clk{font:700 34px/1 var(--display);margin-top:8px;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.hero .dt{font-size:12.5px;opacity:.9}
+.card{background:var(--a-card);border:1px solid var(--a-line);border-radius:14px;padding:12px}
+.card h3{font:600 14.5px var(--display);margin:0 0 6px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.card h3 small{font:400 11.5px var(--body);color:var(--a-mut)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mut{color:var(--a-mut);font-size:12.5px}
+.btn{width:100%;border:0;border-radius:12px;padding:12px;font:600 15px var(--display);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn.pri{background:var(--a-o);color:#fff;box-shadow:0 4px 12px rgba(242,106,27,.3)}
+.btn.dk{background:#1F2933;color:#fff}
+.btn.ln{background:#fff;color:var(--a-ink);border:1px solid var(--a-line)}
+.btn[disabled]{opacity:.45;box-shadow:none;cursor:default}
+.btn.sm{padding:8px 10px;font-size:13px;width:auto;border-radius:10px}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:1px 9px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.s-ok{background:var(--ok2);color:var(--ok)}.s-late{background:var(--late2);color:var(--late)}.s-bad{background:var(--bad2);color:var(--bad)}.s-duty{background:var(--duty2);color:var(--duty)}.s-leave{background:var(--leave2);color:var(--leave)}.s-wait{background:var(--wait2);color:var(--wait)}
+.loc{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:8px 10px;border-radius:10px}
+.loc svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2}
+.loc.in{background:var(--ok2);color:#166534}.loc.out{background:var(--bad2);color:#991B1B}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.qk{border:1px solid var(--a-line);background:#fff;border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:var(--a-ink)}
+.qk svg{width:22px;height:22px;stroke:var(--a-o);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.stat{border-radius:12px;padding:8px 6px;text-align:center}
+.stat b{display:block;font:700 22px/1.1 var(--display);font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;font-weight:600}
+.flash{animation:fl 1.4s ease}
+@keyframes fl{0%{box-shadow:0 0 0 0 rgba(242,106,27,.0)}20%{box-shadow:0 0 0 4px rgba(242,106,27,.55)}100%{box-shadow:0 0 0 0 rgba(242,106,27,0)}}
+.lbl2{font-size:12px;font-weight:600;color:var(--a-mut);margin:2px 0 3px;display:block}
+.inp{width:100%;border:1px solid var(--a-line);border-radius:10px;padding:8px 10px;font:inherit;font-size:14px;background:#fff;color:var(--a-ink)}
+textarea.inp{resize:none;height:62px}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid var(--a-line)}
+.li:first-child{border-top:0}
+.av{width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;font:600 13px var(--display);color:#fff}
+.li .t{flex:1;min-width:0}
+.li .t b{display:block;font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li .t span{display:block;font-size:11.5px;color:var(--a-mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dept{border:1px solid var(--a-line);border-radius:12px;background:#fff;overflow:hidden}
+.dept > button{width:100%;border:0;background:none;padding:9px 11px;display:flex;align-items:center;gap:8px;text-align:left;color:var(--a-ink)}
+.dept > button .n{flex:1;min-width:0;font-weight:600;font-size:13px}
+.dept .body{padding:0 11px 6px}
+.chev{width:14px;height:14px;stroke:var(--a-mut);fill:none;stroke-width:2;transition:transform .2s;flex:none}
+.dept.open .chev{transform:rotate(90deg)}
+.sbar2{display:flex;height:12px;border-radius:9px;overflow:hidden;background:var(--wait2)}
+.sbar2 i{display:block;height:100%;transition:width .4s}
+.leg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;color:var(--a-mut)}
+.leg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:0}
+.tbl{width:100%;border-collapse:collapse;font-size:11.5px;font-variant-numeric:tabular-nums}
+.tbl th{font-weight:600;color:var(--a-mut);text-align:right;padding:5px 3px;border-bottom:1px solid var(--a-line)}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl td{padding:6px 3px;border-bottom:1px solid var(--a-line);text-align:right}
+.feed .li .tm{font:600 12px var(--body);color:var(--a-mut);font-variant-numeric:tabular-nums;width:38px;flex:none}
+.new{background:var(--a-o2)}
+.bar{height:6px;background:var(--a-line);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--a-o);border-radius:9px}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.chips button{flex:none;border:1px solid var(--a-line);background:#fff;color:var(--a-ink);border-radius:99px;padding:4px 11px;font-size:12px}
+.chips button.on{background:var(--a-ink);border-color:var(--a-ink);color:#fff}
+.sw{position:relative;width:42px;height:24px;border-radius:99px;background:var(--a-line);border:0;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s}
+.sw[aria-checked="true"]{background:var(--ok)}.sw[aria-checked="true"]::after{left:21px}
+.ring{position:relative;width:118px;height:118px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .c b{font:700 26px/1 var(--display)}
+.ring .c span{font-size:11px;color:var(--a-mut);display:block}
+.empty{text-align:center;color:var(--a-mut);font-size:12.5px;padding:10px 0}
+.att{display:flex;align-items:center;gap:8px;font-size:12px;background:var(--a-o2);border:1px dashed #F7B48A;border-radius:10px;padding:8px 10px;color:var(--a-ink);width:100%}
+
+/* overlays inside a phone */
+.notif{position:absolute;left:10px;right:10px;top:40px;z-index:30;visibility:hidden;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.22);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;transform:translateY(calc(-100% - 50px));transition:transform .35s cubic-bezier(.2,.9,.3,1.2),visibility 0s .35s;color:var(--a-ink)}
+.notif.show{transform:none;visibility:visible;transition:transform .35s cubic-bezier(.2,.9,.3,1.2)}
+.notif .lg{width:30px;height:30px;border-radius:8px;background:#06C755;display:grid;place-items:center;flex:none;color:#fff;font:700 10px var(--body)}
+.notif b{font-size:12.5px;display:block}
+.notif span{font-size:12.5px;display:block;line-height:1.35}
+.sheet{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column}
+.scan{background:#0B0D10;color:#fff}
+.scan .tp{display:flex;align-items:center;justify-content:space-between;padding:38px 14px 10px}
+.scan .tp b{font:600 15px var(--display)}
+.scan .xb{border:0;border-radius:99px;background:rgba(255,255,255,.16);color:#fff;padding:6px 12px;font-size:13px}
+.scan .cam{flex:1;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 42%,#3a4048,#15181c 70%)}
+.scan .face{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:62%;opacity:.9}
+.scan .oval{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:66%;aspect-ratio:3/4;border:3px dashed rgba(255,255,255,.7);border-radius:50%;transition:border-color .3s}
+.scan .oval.good{border:4px solid #22C55E}
+.scan .hud{position:absolute;left:10px;right:10px;top:10px;display:flex;flex-wrap:wrap;gap:5px}
+.scan .chip{border-radius:99px;padding:3px 9px;font-size:11.5px;font-weight:600;background:rgba(0,0,0,.55);color:#D1D5DB;border:1px solid rgba(255,255,255,.18)}
+.scan .chip.on{background:rgba(242,106,27,.92);color:#fff;border-color:transparent}
+.scan .chip.done{background:rgba(22,163,74,.92);color:#fff;border-color:transparent}
+.scan .line{position:absolute;left:18%;right:18%;height:2px;background:linear-gradient(90deg,transparent,#FF8A3D,transparent);top:20%;animation:sc 1.6s ease-in-out infinite alternate}
+@keyframes sc{to{top:68%}}
+.scan .bt{background:#15181D;padding:12px 14px 22px}
+.scan .msg{text-align:center;font:600 14.5px var(--display);min-height:22px}
+.scan .pb{height:7px;background:rgba(255,255,255,.18);border-radius:9px;overflow:hidden;margin-top:8px}.scan .pb i{display:block;height:100%;width:0;background:var(--a-o);transition:width .35s}
+.res{background:rgba(15,20,26,.55);align-items:center;justify-content:center;padding:18px}
+.res .box{background:#fff;border-radius:20px;padding:20px 16px 16px;text-align:center;width:100%;display:flex;flex-direction:column;gap:8px;align-items:center}
+.res .ic{width:58px;height:58px;border-radius:50%;display:grid;place-items:center}
+.res .ic svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.res h4{font:600 18px var(--display);margin:0}
+.res p{margin:0;font-size:13px;color:var(--a-mut)}
+
+/* PDF preview modal (page level) */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(10,14,18,.6);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:calc(20px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px))}
+.modal .mh{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff;margin-bottom:10px}
+.modal .mh b{font:600 15px var(--display)}
+.modal .mbox{width:min(640px,100%)}
+.a4{background:#fff;color:#111;aspect-ratio:210/297;width:100%;padding:6% 7%;font-family:var(--body);font-size:clamp(8px,1.7vw,11.5px);box-shadow:0 10px 30px rgba(0,0,0,.4);overflow:hidden}
+.a4 h5{font:700 1.45em/1.3 var(--display);text-align:center;margin:0}
+.a4 .sub{text-align:center;margin:.2em 0 1em}
+.a4 table{width:100%;border-collapse:collapse;margin-top:.6em}
+.a4 th,.a4 td{border:1px solid #999;padding:.35em .5em;text-align:left;vertical-align:top}
+.a4 th{background:#F3F4F6}
+.a4 .sum{display:flex;gap:1.4em;flex-wrap:wrap;font-weight:600}
+.a4 .sig{display:flex;justify-content:flex-end;margin-top:2.2em;text-align:center}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.track{scroll-behavior:auto}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <img class="logo-light" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPMAAAA4CAYAAAAo2c5IAAAZh0lEQVR42u1deVgUR/p+a3qYg0MU5fDk0IiIBvFASTzAeIAEzwSjxuhuxFVjdHezZt38TOIaNRoTE3NgJLrGTYLReHFEREQUiQoiKoqgi6ByyCVyzMBcPfX7Y2QEerhkBkac93l4Hp6e7q7u6nrr+76q760ilFKYYIIJzz54piowwYSnR3FxidFYQ77pc3QObNv2Ba2oqICjYz8EBy8hhrrGBCA0dDc9cOAA8vMLag9RhmEwZMgQfPrpRri4uHRIXZoscydAQcEDevJkLA4dOozExD8Mds3zjsjIKOrtPZZu3/5lXSIDAFiWRU5ODqqqqjreMhcUPKAA0KtXT6PqoYuLS6hKpQKfz4ednW27P5vsdjJV3ogHe+sC2LxMULkUVFreoEtkQCxtQCyswXcaBv7g8eC7T4Cwp4vJ2nUS7NnzH7p9+1dgWRYA4OzsjHHjxmLo0CEoL69Aamoq0tKud7ybHRt7ir777moAgK+vL92581ujaITXrl2jwcHLUFlZidGjvbBv3952KVd6NowqTu2G6u41QKVo/gI1C1pZAlpZAsWDLCguHAIAEIGI8geNhdBvOcSeU0zEfkaRkHCOfvPNt2BZFjY2Nti8eSN8fCbU+54LFy7Q/u/l5W2wOJoQgtpB6/37f0H//k8MBidmvnQpGSkpl+nIkSM6vPEdOxaBysrKdilLUV5CZeGfQxH/I6i8Wi/3pAoZlGmnoEw7BamlDRVNfw+WgatMpH72rDJkMjlEIiHWrfuAQ+SGaK82q1azTcfMEokUYWH7O7wCMzIyaVxcXLuUJYkJpZXvDYP8RIjeiMwhtqQMNWH/h9JgRyqJCTXNBz4jOHcukaamXgEATJw4EdOm+eu9MyaEgBDyFGSmumPmukhM/APXrl2jHh4eHWZFTp6MRXFxiUHLkN/PoNLv/gz2/o3mK1xkCV5vVzB2TmCcPUHMrR+PfKigyrkCKnkENj8D9GEeqELWNKn3rYHyUgQ1D/4WQnsnk6U2YiQnX4JSqQTDMPD3n9qia2bMmN5c1w5A89nj4k5DIpEAACwtLfHKKxM55zSGLl2smidzZWUljh2LgIeHR4dUYG5uLo2JOWnQMqoTf6PVe/8KWt2IS0R4YBz6QzA5GALvORB0tWsx6eQPsqky6Sjkcf+B+mEeQNUNvqUaqvSzkKyfBPWK3VQ81MdEaCPF7du3tcRxcOjZomu2bv20xd8zICCQ1pLZ3t6uVdc2RKNTU3FxccjIyOwQd/DMmbPIzs42nFv9+zdUumuZbiITHvhuY2H1yRnYbE8llv7LSWuIDADCni7EcuZ7pPs36cTqkzPgu40FCLeq1eVFkH7+OqSn9prcbiOFTCZ7bDWt0L17d73fX6Vidf6vFzK/9JI3xGIxiotLcPJkbLtXXlFRET106PDjnsoejo799Hr/qkOf0ppf1+scpebZ9IbFX39Ct4+iiai/p16spai/J+n2UTSx/Fc4eDa9uQ6XQobqff+ANO5HE6GNDIWFhbSoqAgA0K1bV4NM29aNlZ8mbm6SzA4ODujbty8AICIiEnfv3m3XRpaUlIysrDsAAC+vUbCzs9PbvaVxP1JZ+Oc6icx394HVhtMw95puEJdXPNSHdP8uk5h5+unonhWoCVuHmrR4E6GNCGo1BctqQiSxWGz0z8shM8uqMGrUSABAfn4+zp1LbNcHCgvbD5ZlYWlpAT+/qZDL5Xq5b01aPK0JW8clMuFBMGEhuq2LJILuvQweu3Z9/zdiNmY2x+2m1RWo/uEdyHMzTYQ2QX8xs7+/HywtLQAABw78hsLCwnZpYPHxZ2h6+k0AwKhRXnB2dsKjR+Vtvq88N5NW//AOaHUFh8hmo2fCellIuw5AdV29j5iNCuRagtJc1Pz0T1OrNEF/ZB45cgQZNswTAJCTk4MLFy62y8McPHgISqUSZmZmCAp6DSKRflybmiOfQl2ayzluNioQXVfvaxGRqy8coeWfzqKlwY60ZL41LZlnRUsX2dJH66fSmrTTre7szP+0HUz/EZzjypsJkJ7eZ7LOJuiHzACwYME8mJmZgWVZHDhw0OAPkpJymV66lAwAGD7cE76+PkStZqFWq9t03+qLR6kyJYr74raOEM9d3+z1kphQWhrsSKVfL4Iy7RSopEw71UQVMqhunYdkyyxU7FxGAUB2L52WLnWmJfOstH+lS52p7F56PYIKutoRcdBHICKLBnGOCvITIVCUFz9zhC4oeEBr/9rDmysqKqJ1yywqKnquO8FGJZC+vj5k+HBPmpSUjPT0m4iOPkH9/f0M5o6Ghe2HRCIFwzCYM2c2AODhw4dtVqHIIr7kxMlEIIZ40TYIew1o8n3Kv5hHlZePc+eJG4KqoUj4BeWKGirwfg2QSeqXx+eDCM05l4lfnEgUI6dTRWL9jDu24DZUN89B8NIco248ubm59OefwxAZGYWysjKdNdO7dy8EBEzD66+/hr59+7ap/WRlZdGjR48hNvYU8vMLtKKHumAYhvbu3Qt+flNbVeaBAwfp9ev1k4dkMhkePSrTeqhr135A+XzdlBGJRFi4cAEcHR2J0ZEZAObMmY2UlMtQKpU4fPgo/P39DPIQGRkZ9OLFJACAu7s7vL299XLf6vOHKXufq2Qx85oJ8xGNp+UpyoupNGQJVNfjW1WeKjUahC8EVdbPACPm1iACkc5rhJOWQJl6vH48z6qgSPgF5kZM5g0bNtIDBw7qJFRd5OcXIDR0N/bs2YvFi9+ia9b8o9WNPTU1lW7Zsg1paWnNnsuyLO7fz9WWOWbMaLpmzT8waJAraaYMhIdHNvp7cXEJjh0Lb/T3Ll26IDAwAGZmAtpRysMmyezt7Q13d3ekpaUhJeUSEhLO0fHjx+n9QY8cOart2QMDA2Br20MvZSgSfgFYVX1iWdpAOHlJ0zH2L+saJTKxtIHZqEDw+4/UpHL+L+kxGStBFTVoaGU1PrU5BDa6P7DI1YvIXvCiymv15/RV2Vcgu5dORY7uRpUddu/efbpq1WrcunW71hJi0CBXTJ06FX36PJlHz8vLx/nzF3D16hXIZHKwLIvS0tJWl7d162f0v//9uV6n0bt3L7z00ksYMWI4BAKB9nhVVRUuXUrB+fMXUFZWBpZl8ccf53H16kKsWrWSLlr0VqfOtGuSzLa2PUhgYABNS0uDTCbHsWPhGD9+nF4f4O7du/T06TMAgAEDBmDy5El6ua/sVjJV/S+Za5VffAWigV6NflTp2V+o4uJhHTUlgCjw77AK+r/6105ZAsXDAird+Reo0s/oHpiwbnqu3Mx7DpRpcfXceSopgzr3JuDobjSNpaSklK5Z808tkd3dB2PTpo2NWr2lSzWd5qFDh+muXT+0qqzS0lK6du0H2oUTGIbBhAnjsWrVu01a2blzgzjWXCqV4rPPPkd5eQVdvfpdorvT2EK2bt3CGQNYtOhPyM3NrZXgGnVn0OxKI5MnT8KAAQMAAAkJCUhJuazXQYbw8Ejk5+dry3JwcNBLhSmvx3GmoohADMG4+Y1b8tICKo/8ijsXzRfAfPEXXCLXGt7uvYj54s/B696nkVpmmnxWxmkYiKUNJw5X5aQaVWP5+eefta6ut/cYHD78G2nOfQWA116bQ2JjT5D58+e1uKw1a/6pJbKdnS127vwOISHftqg8zSDqcHLw4H7y739/DJFICJZlERr6A0JDd3faQbJmyezg4EBqraVEIsXvvx/XW+GFhYU0NvYUAKBnTwe8+mqA3u6tusF1k3n2zmCcXmyczJfCwRbc5pJ1zBxYvLK4yUYk7ONKzIZN0U3WXgOb/ghd7cGz6cU5ri74n9E0lPz8fBodfUJLrvffX9Pqe7RUhbdu3Ue0djrUyckRP/wQiqcN7+bODSKbN2+qQ+hQJCUl0eeSzAAwY0YgevfWxEMxMSeRkZGhl8qIjT2FrKwsAICPj0+9VRPaAnlBFmUL73A95YFjmlQ/Kc7t54xc87r3gWjGey2LWQbpFlQ0B4F1D8LrxlXkqCuKjaahZGfn4MGDQgDAsGHD4OY2yCAuZ2xsLI2K0kwlalb12ARX14FtKmvaNH+yYsUKMAwDiUSKkJDv8dyS2cnJibz66jQAQFlZGU6ciNFL4bVW3sbGBkFBr+ntpdQPsoCGiijCA/OCV+ODXldPUXV+JjeeHREAYZ+WuXakqz2IkJvowuvj1vyH6K5DhFFRDHnRPaOwIrm5uVAqlY9jZcPF8Xv27IVMJgfDMHjnneUYPlw/gpelS5eQkSM1STopKZcRERFJn0syA4Cf31TY2Gjiuqio420WYERERGrn9caMGQ03Nze99fRsyV3u9JDIAjw758bd8szzoIoazjVmo6a37WEID4Qxa/40cRfuQco2P8fdTqiqkhi8jLrpvO7u7pgyZYpe77948SJtIlRERBSeWzK7ubmRqVOn1MZPiIlpmzwyIiJKK6hozcBIS0Af5nPJIrKALldWS+Y7KTpi7P5g+g5uG5eFYpCu9s98Q7G3fzIiX1xsGPc/MjJKa/31OUVZC19fH+LmNggAcPPmTb2Fi88cmQEgIGCaVoARGRn11AKM+PgzNClJkyQyapQX9L14oK5BLNK1J4QOzjrLUZQ9oPRRAbdy7JwgsG5jg2IE3JTNZxDOzk7o0kXjPVy7dk3vOznk5+fTGzc0npqDgwPGjn3ZIO8xevRobbh45cpVPLdkHjlyBBk/fjwATXpbXNzppyo0PDyinqCio0EVMq6iCgBj79K6+0jKQJX1JZtEIOROO+m6toa76klTmWPtDQ8PD+LioglTMjIym8yGehrk5eWjpESTVOLqOhDOzs4GGWAbPPjJ+EWtS/9ckhkA5s59HZaWFmBZFpGRrY87UlIu08REjUa6VlDR0ZWgLs0FreHmgLdk4KoeIasrOBlnMBMDLYiZ1Y8KuQebyBzrCLz99p+0UzwhISH48Uf9qbvu3LmDmhrNmMXAgQMN9g69evXUehh5eXnPN5lHjx6tlUdev36j1aOCv/9+nCOo6Cxgs7lJHsSiK4S2fZolpLqiiPtxevQ1qvebPHmydopHJpNjy5bPEBQ0j2Zm3mozqWunvQCgf38Xg72Dra0drK01K6sWFRW1m1bfKMkM1JdHtmZUMCMjQ7vqpj4FFUZD5rwMLplb4CbLC7KoLr0132W40b3j0qVLyPLly8Awmqy2tLQ0zJnzOt5+O5imp998amIUFz/pzCwsDDfGwOMRMIym2bOsmrP29HNHZl9fH+LurhnlTUpKQnz8mRbVyIkTMQYRVBgDZPfSKasjY4tYdGu+E7h/Q6OTrtcJiME4eRjlu65cuYLs3h0KZ2fnx6TQCBqCgt7AvHkLaGpq6lMzxMrKCj169DDYszs4OBB7e3t0Rjz1LpDz588DwzBQKpUID49o9vy7d+/SqChNkog+BRW6QMRW3Hi2iQQMYtVdE9s2dH11WNpGCXnrPIeQLYXyUgQn1m4u9bSj4e09hkRHR5ENG9ajW7duWlJfuXIV8+cvRFDQvKey1IQQ8HimZcTblcy18kgASExMbFaAce5cokEEFTpfSsd8MpVXg1bpluARc2udHYDq7rUWlyk/85POBA8qfdT0dfdvUmX6Wc5xM6+ZaO163R2BoKDXyYULiWTTpk+0lrrW/Q4KegPr129oFaGVSiVkMrlBn7k5DfZzR+bH8kgAGgHG0aPHGj23sLCQHjjwGwCgd+/emDEj0LAvpWMUmlZXQF2oe2F9oW0fwrNz0un+yu5eb7YxSmP36FwEAdCMUstL8hq9hzz2B9AGOdjE2g4CrxnPVEOaM2c2iY6OIqGh32tVdizL4tdfD2DSpKk0Le16i0hdU1Nj0I3XNMsLFZvI3BB15ZHx8Wcazai5cOEicnJyAAATJ/rAycmw+yvx7Jy4lpaqocpsfNlgM/cJ3A6gsgSy8M+bbnxp8bTm148BVgWeQ3/O8kC0vBC6cr4BoPpyNFUk/NLATeBB6PMWhP0GP5O+5vjx40hUVDjZsGG9diArLy8Py5atQFOEdnR80pmWlBhuj7GqqirIZJopMHt7O6Pbj7zDyFxXHllWVoYjR47qPK92eRkbGxvMnj3L4C/F2DvrlBSqsq80Tubh/iA6FhFQJoejKuwjnY2w5voZWr0zGLS6AkQghtBnEcAX1iezogbyuD1cIl88RqtDgjn54IyLJ4R+y5/5hhUU9DoJC/sZTk6O2vaxc+euRs/v1etJaHTnjuG2JiouLkZ5eUVt+zVZ5rqoK488ffoMR4ARHX1Cmzyvb0FFYxDY9CSMI3fwSJ2fiZqrp3QSU9hvMBHoElWoWcgiv8TDv3rQqiNbqTTuR1p1ZCstW/sylXw6A+pyzZQK39UbZl7TQSy6cjuEy8dR9qEvlZz4nkoid9CyD32p9JvFnKwzXo++sPjL989ErNwSuLoOJJs3b9IKdGr3/tZ1bt100VpZrCFw82aGNv/7hRdeMJG5LpycnMjEiT4ANAKMhouiHT58FEql0iCCiqZgNiIAYPgcK6k4F9boNcLAv4HXSAqnuigbst82onr3u5D9thHsvTTtgBcxt4Zw5hoIe/Yn/EE6coqpGmxWCmr2rUFN2DqwWSlAg42yiaUNzP+yE8K+gzrVUO7w4Z5agY5EIm10UT4PDw9Sa8XT09P1vqJNLVJTNYk9YrEYw4Z5mMjcELNnz9L2vrGxp7RZNSkpl+nVqxrX1hCCiiZd7f4jdW7UpkyLg+x2sm7rbNePmC8NAa8VKiciEEG8YBPEg8cSABD6rwDpYtu6j2DrCMt/HoF4yIROOSfj4fHES2pqh5KXX35ZS/qYmBi9P0dGRoZWduvqOhCjR3sRE5kboK48MicnB8nJlwAAZ88mQCKRdoigQmjvqHOTNiopgyz6u0avEw9+mVj+KxJMvyHNV55Nb5iv/BEWExdpG4XIaSixWPmfFnUIRCCCwHcRun99g4gGjOi0k6t1M7qqq6sbPW/KlElao6BZ0Ua/+24dPHhIm7QUEDCt09UzT183qpVHsiyL338/jtzcXHr2bEKtq9UhggrhK3/WPaiVEtXkFqrCfm7EZusFYvn+YZi9OAlEZPmEgCJL8F/wgvmyXej+XSYxHxXAeS/xUB/SfWcWEb/1GZi+g+uldBKRJZi+gyGevxFddtyE9dJvO32GRG7uk1TVpnb1dHNzIwEB/o8Hqkqwa1eo3p4hKSmJRkZqQkAXFxf4+EzodPXM19eNHssj6fHj0bh+/QaOH49GTk5OhwoqhP0GE4XPW1QWsb1+QodKAdmxz8AfOIY2FaOKPacQsefTr3Zh6b+cwH85nndcvapJvjEzM6snQdSFN99cgHPnEnH37j3Exp5CaOhuunTpkjZ1ePfu3acbNmzUCnyCg99u8+4andoyA8DMmTMgEglRVlaGL7/cAaVS2eGCCqHfcjAuntwBrdJcSHe8CXlBlmmTtpYRkpaWlra6rlJTU+vsVjIY48aNbZJEjo6OZNWqd7VSyx07vsb33+966m/04MEDum7dh9rprlmzZmLWrJmd0hvSK5nHjx9HRo4cVe9YRwsqNBu0fQxibs35jc2/Ben2N0yEbpGbmozAwJk4diy8xXV15042/fDDj1FZWQkzMzMsWDC/RddNm+ZP3n13JRiGAcuy+Oqrr7FixUqam5vbqu+UkHCOzp07D5cuaZaE8vYeg40bN3TasIan7xvWyiMBwwsqWgrxi75EPH8jwBfoJLTkEz/UXD9jInQzePToEdau/QDjx/vSbds+p7du3aa63dp7dPPmLTQo6A3cuZMNhmEwe/YsBAa+2mIivf32n8nate9DJNIk4Zw+HQ8/vwCsXv032tS61wUFBTQsbD/193+VLl26DMXFmmyyqVOnYO/ePUZHZIbhgWGYx39toyNf3w/nq5FH0qtXrxlcUNEaWLyymKiLsqksagdHEKEuL4LkszlQ+i2nXRZsNNjzyvNu0ZYu22tsEImEWktZXFyMPXv2Ys+evWAYhtrZ2YJh+GBZFYqLS+oJGRiGwfLly7By5YpWv/fChW+SIUOG0A8+WIecnBywLIuYmJN4rImnFhYWdRRb3LIBzUj6smVLERy8xCjrvaKiUvvMFRWVxkVmQCOPLC19aHBBRWthNX8DAY+hssgvOUkbUCkgj9qB0jM/UdH0v8MycLXePn51cgSVHfwEEJpDuOnsM2mVFy16iwwdOoRu2/YF0tKuaxsgy7L1VgmpS+IXXxyKjz/+CC3dUkYXPD2HkejoKERGRtGQkO+1Of4AIJVKIZVKdX9rKyvMnj0Lixa9ZdT51zNmTNduqNdWHTeh9PnzLiXHv6OyA+tBFbImujkBzAaPg2DCQpi/NKfVjaH64jGquHgEqqsxoHLN3Crj7AmbzQmdImaLjT1FL15MQnZ2NnJzNWtp9e3bBy4uLhgzZjQ8PDxgZ2er93ctLCykly+nIjX1Sr2yu3TpgkGDXOHm5gYvr1Ft3gXjWcRzSWYAkGVepNKQJVCX3GtZRVl0Bc+mF3g9XwBh+GCcPUHMrcHeu65Zv0ul1K4YQmW6F4zvTGQ2wURmo0NV2EdUHrOzaSutr8EOE5lNMCB4z3sFWM3fQKy2JkPg/ZrO0W79dZs88Lr0MLU4E0yWub0gPbWXyk/uApufyR0ka3VXyYBn6wjBmNkQ+C6G0N7RZJVNMJG5Q+Lq28lUeSMe7K0LYPMyQeVSUGk5txIFIk1SitgKTL8h4PcfCf5Ab4hcvUzkNcFEZhNMMKF1+H9LGf8mFvMfQQAAAABJRU5ErkJggg==" alt="MallsofT">
+      <img class="logo-dark" src="data:image/png;base64,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" alt="MallsofT">
+      <div style="min-width:0">
+        <h1>ระบบลงเวลาครูและบุคลากร</h1>
+        <p>เดโม โรงเรียนริปองวิทยา · ปัดการ์ดเพื่อดูแต่ละบทบาท ทุกหน้าจอเชื่อมกันแบบเรียลไทม์</p>
+      </div>
+    </div>
+    <span class="tag">ข้อมูลสมมุติ</span>
+  </header>
+
+  <section class="ctl" aria-label="ตัวควบคุมเดโม">
+    <div class="grp"><span class="lbl">เวลาจำลอง</span><div class="seg" id="segTime"></div></div>
+    <div class="grp"><span class="lbl">ตำแหน่งครู</span><div class="seg" id="segLoc"></div></div>
+    <button class="ghost" id="btnReset" type="button">เริ่มเดโมใหม่</button>
+  </section>
+
+  <nav class="roles" id="roleTabs" aria-label="บทบาท"></nav>
+
+  <div class="stage">
+    <button class="nav-arrow l" id="arL" type="button" aria-label="ก่อนหน้า">‹</button>
+    <div class="track" id="track"></div>
+    <button class="nav-arrow r" id="arR" type="button" aria-label="ถัดไป">›</button>
+  </div>
+  <div class="dots" id="dots"></div>
+
+  <section class="tips">
+    <h2>ลองเล่นตามนี้</h2>
+    <ol>
+      <li><a data-go="0">ครูภาษาไทย</a> กด “สแกนใบหน้า ลงเวลามา” แล้วดูชื่อหายจากรายการ “ยังไม่มา” ที่ <a data-go="1">ฝ่ายบุคคล</a> ทันที</li>
+      <li>เปลี่ยนเวลาจำลองเป็น 08:30 แล้วลงเวลา ระบบจะขึ้นสถานะ “สาย” ให้อัตโนมัติ</li>
+      <li>ครูแจ้งลาหรือไปราชการ ผู้บริหารเห็นในกิจกรรมล่าสุดของ <a data-go="2">ผู้บริหาร</a></li>
+      <li>เลือกตำแหน่ง “นอกโรงเรียน” แล้วลองลงเวลากลับ ระบบแสดงระยะทางและขอเหตุผล</li>
+      <li><a data-go="3">ผู้ดูแลระบบ</a> ปรับเวลาสาย ระงับบัญชี หรือรีเซ็ตใบหน้าครู แล้วดูผลที่หน้าครู</li>
+    </ol>
+  </section>
+  <p class="foot">MallsofT · โทร 081-434-6617 · LINE ID mr.ripong · www.malls0ft.com<br>รายชื่อบุคคลและโรงเรียนในเดโมเป็นข้อมูลสมมุติทั้งหมด</p>
+</div>
+
+<div class="modal" id="pdfModal" hidden role="dialog" aria-modal="true" aria-label="ตัวอย่าง PDF">
+  <div class="mbox">
+    <div class="mh"><b id="pdfTitle">ตัวอย่างไฟล์ PDF (A4)</b><button class="ghost" style="color:#fff;border-color:rgba(255,255,255,.4)" type="button" data-close>ปิด</button></div>
+    <div class="a4" id="pdfPage"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+// ===================== DATA =====================
+const SCHOOL = 'โรงเรียนริปองวิทยา';
+const DEPTS = ['ภาษาไทย','คณิตศาสตร์','วิทยาศาสตร์และเทคโนโลยี','สังคมศึกษา ศาสนาและวัฒนธรรม','สุขศึกษาและพลศึกษา','ศิลปะ','การงานอาชีพ','ภาษาต่างประเทศ','กลุ่มงานพัฒนาผู้เรียน','ผู้บริหาร','สำนักงาน'];
+const DEPT_FULL = d => (d==='กลุ่มงานพัฒนาผู้เรียน'||d==='ผู้บริหาร'||d==='สำนักงาน') ? d : 'กลุ่มสาระการเรียนรู้' + d;
+const ROLE_NAME = {teacher:'ครู/บุคลากร', hr:'เจ้าหน้าที่ฝ่ายบุคคล', exec:'ผู้บริหาร', admin:'ผู้ดูแลระบบ'};
+const RAW = [
+ ['T01','นางสาวพิมพ์ชนก ศรีสวัสดิ์','ครูชำนาญการ','ภาษาไทย','teacher'],
+ ['T02','นางสมศรี ใจงาม','ครูชำนาญการพิเศษ','ภาษาไทย','teacher'],
+ ['T03','นางวิไลวรรณ พรหมมา','ครูชำนาญการ','ภาษาไทย','teacher'],
+ ['T04','นายกิตติพงษ์ บุญมา','ครู','ภาษาไทย','teacher'],
+ ['T05','นางสาวรัตนา แสงทอง','ครูผู้ช่วย','ภาษาไทย','teacher'],
+ ['M01','นายสุรเชษฐ์ คำดี','ครูชำนาญการพิเศษ','คณิตศาสตร์','teacher'],
+ ['M02','นางปราณี ทองคำ','ครูชำนาญการ','คณิตศาสตร์','teacher'],
+ ['M03','นายอนุชา รุ่งเรือง','ครู','คณิตศาสตร์','teacher'],
+ ['M04','นางสาวจิราพร มั่นคง','ครูผู้ช่วย','คณิตศาสตร์','teacher'],
+ ['M05','นางนงลักษณ์ ศรีประเสริฐ','ครูชำนาญการ','คณิตศาสตร์','teacher'],
+ ['S01','นายธนกร แก้วมณี','ครูชำนาญการ (คอมพิวเตอร์)','วิทยาศาสตร์และเทคโนโลยี','admin'],
+ ['S02','นางอรวรรณ เพชรรัตน์','ครูชำนาญการพิเศษ','วิทยาศาสตร์และเทคโนโลยี','teacher'],
+ ['S03','นายวีระพงษ์ ชัยมงคล','ครูชำนาญการ','วิทยาศาสตร์และเทคโนโลยี','teacher'],
+ ['S04','นางสาวกาญจนา พูลสวัสดิ์','ครู','วิทยาศาสตร์และเทคโนโลยี','teacher'],
+ ['S05','นายณัฐวุฒิ ทองประเสริฐ','ครูผู้ช่วย','วิทยาศาสตร์และเทคโนโลยี','teacher'],
+ ['S06','นางสุภาพร วงศ์สวัสดิ์','ครูชำนาญการ','วิทยาศาสตร์และเทคโนโลยี','teacher'],
+ ['O01','นายสมชาย อินทร์แก้ว','ครูชำนาญการพิเศษ','สังคมศึกษา ศาสนาและวัฒนธรรม','teacher'],
+ ['O02','นางเพ็ญศรี ดวงจันทร์','ครูชำนาญการ','สังคมศึกษา ศาสนาและวัฒนธรรม','teacher'],
+ ['O03','นายประยุทธ ศรีวงศ์','ครู','สังคมศึกษา ศาสนาและวัฒนธรรม','teacher'],
+ ['O04','นางสาวศิริพร บุญเรือง','ครูผู้ช่วย','สังคมศึกษา ศาสนาและวัฒนธรรม','teacher'],
+ ['H01','นายชัยวัฒน์ แข็งแรง','ครูชำนาญการ','สุขศึกษาและพลศึกษา','teacher'],
+ ['H02','นายภานุวัฒน์ ใจดี','ครู','สุขศึกษาและพลศึกษา','teacher'],
+ ['H03','นางสาวพัชรี สุขสบาย','ครูผู้ช่วย','สุขศึกษาและพลศึกษา','teacher'],
+ ['A01','นางมาลัย ศิลปชัย','ครูชำนาญการพิเศษ','ศิลปะ','teacher'],
+ ['A02','นายเอกชัย ดนตรีงาม','ครูชำนาญการ','ศิลปะ','teacher'],
+ ['A03','นางสาวอัญชลี ลายไทย','ครู','ศิลปะ','teacher'],
+ ['W01','นายสมพงษ์ ช่างทำ','ครูชำนาญการพิเศษ','การงานอาชีพ','teacher'],
+ ['W02','นางบุญเรือน เกษตรดี','ครูชำนาญการ','การงานอาชีพ','teacher'],
+ ['W03','นายวิทยา มีฝีมือ','ครู','การงานอาชีพ','teacher'],
+ ['E01','นางสาวนันทนา สมบูรณ์','ครูชำนาญการพิเศษ','ภาษาต่างประเทศ','teacher'],
+ ['E02','นางจันทร์เพ็ญ ภาษาดี','ครูชำนาญการ','ภาษาต่างประเทศ','teacher'],
+ ['E03','นายปิยะ วงศ์ใหญ่','ครู','ภาษาต่างประเทศ','teacher'],
+ ['E04','นางสาวหทัยรัตน์ จีนสกุล','ครู (ภาษาจีน)','ภาษาต่างประเทศ','teacher'],
+ ['E05','นางสาวอรอุมา แก้วใส','ครูผู้ช่วย','ภาษาต่างประเทศ','teacher'],
+ ['G01','นายสุทธิพงษ์ ลูกเสือ','ครูชำนาญการ (กิจกรรม/ลูกเสือ)','กลุ่มงานพัฒนาผู้เรียน','teacher'],
+ ['G02','นางกนกวรรณ แนะดี','ครูชำนาญการ (แนะแนว)','กลุ่มงานพัฒนาผู้เรียน','teacher'],
+ ['G03','นางสาวดารุณี ช่วยเหลือ','ครู (แนะแนว)','กลุ่มงานพัฒนาผู้เรียน','teacher'],
+ ['X01','นายประเสริฐ วงศ์ไพศาล','ผู้อำนวยการโรงเรียน','ผู้บริหาร','exec'],
+ ['X02','นางสุนันทา มีสุข','รองผู้อำนวยการ','ผู้บริหาร','exec'],
+ ['F01','นางวราภรณ์ ทองดี','เจ้าหน้าที่ฝ่ายบริหารงานบุคคล','สำนักงาน','hr'],
+ ['F02','นางสาวปวีณา เรียบร้อย','พนักงานธุรการ','สำนักงาน','teacher'],
+ ['F03','นางสาวเบญจมาศ นับเงิน','เจ้าหน้าที่การเงินและพัสดุ','สำนักงาน','teacher'],
+ ['F04','นายสมบัติ ซ่อมเก่ง','พนักงานบริการ','สำนักงาน','teacher'],
+ ['F05','นางลำดวน รักสะอาด','แม่บ้าน','สำนักงาน','teacher'],
+];
+const ME = {teacher:'T01', hr:'F01', exec:'X01', admin:'S01'};
+const LEAVE_TYPES = [['ลาป่วย',60,'วันทำการ/ปี'],['ลาคลอดบุตร',90,'วัน/ครั้ง'],['ลาไปช่วยเหลือภริยาที่คลอดบุตร',15,'วันทำการ'],['ลากิจส่วนตัว',45,'วันทำการ/ปี'],['ลาพักผ่อน',10,'วันทำการ/ปี'],['ลาอุปสมบทหรือลาไปประกอบพิธีฮัจย์',120,'วัน'],['ลาเข้ารับการตรวจเลือกหรือเข้ารับการเตรียมพล',0,'ตามหมายเรียก'],['ลาไปศึกษา ฝึกอบรม ปฏิบัติการวิจัย หรือดูงาน',0,'ตามที่อนุมัติ'],['ลาไปปฏิบัติงานในองค์การระหว่างประเทศ',0,'ตามที่อนุมัติ'],['ลาติดตามคู่สมรส',0,'ตามที่อนุมัติ'],['ลาไปฟื้นฟูสมรรถภาพด้านอาชีพ',0,'ตามที่อนุมัติ']];
+const TIMES = ['07:40','08:05','08:30','12:00','16:35'];
+const AV_COL = ['#F26A1B','#2563EB','#16A34A','#7C3AED','#D97706','#0E7490','#BE185D','#4D7C0F','#1F2933','#9333EA','#B45309'];
+
+// ---------- dates ----------
+const pad2 = n => String(n).padStart(2,'0');
+const iso = d => d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+const HOLI = {'2026-10-13':'วันคล้ายวันสวรรคต ร.9','2026-10-23':'วันปิยมหาราช','2026-12-07':'ชดเชยวันพ่อแห่งชาติ'};
+function demoToday(){ const d=new Date(); d.setHours(12,0,0,0); while(d.getDay()===0||d.getDay()===6||HOLI[iso(d)]) d.setDate(d.getDate()-1); return d; }
+const TODAY_D = demoToday(); const TODAY = iso(TODAY_D);
+const isWork = d => d.getDay()!==0 && d.getDay()!==6 && !HOLI[iso(d)];
+function addDays(s,n){ const d=new Date(s+'T12:00:00'); d.setDate(d.getDate()+n); return iso(d); }
+function nextWork(s){ let d=addDays(s,1); while(!isWork(new Date(d+'T12:00:00'))) d=addDays(d,1); return d; }
+const FY_START = (TODAY_D.getMonth()>=9 ? TODAY_D.getFullYear() : TODAY_D.getFullYear()-1) + '-10-01';
+const FY_BE = Number(FY_START.slice(0,4)) + 544;
+const thDate = (s,opt) => new Date(s+'T12:00:00').toLocaleDateString('th-TH', opt||{day:'numeric',month:'short',year:'2-digit'});
+const thLong = s => new Date(s+'T12:00:00').toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const PAST = []; { let d=new Date(FY_START+'T12:00:00'); while(iso(d)<TODAY){ if(isWork(d)) PAST.push(iso(d)); d.setDate(d.getDate()+1);} }
+const toMin = t => { const [h,m]=t.split(':').map(Number); return h*60+m; };
+
+// ---------- seeded random ----------
+function rng(seed){ let s=seed>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+
+// ===================== STATE =====================
+let S;
+function fresh(){
+  const r = rng(20261103);
+  const staff = RAW.map((x,i)=>({id:x[0],name:x[1],pos:x[2],dept:x[3],role:x[4],active:true,face:true,col:AV_COL[i%AV_COL.length]}));
+  // past history per person
+  const hist = {};
+  staff.forEach((s,i)=>{
+    const rr = rng(1000+i*77); const lateBias = (i%7===3)?0.16:(i%5===1?0.09:0.04);
+    hist[s.id] = PAST.map(d=>{ const x=rr();
+      if (s.id==='T01'){ if(d===PAST[4]||d===PAST[5]) return {d,c:'V',t:'ลาป่วย'}; if(d===PAST[11]) return {d,c:'V',t:'ลากิจส่วนตัว'}; if(d===PAST[8]) return {d,c:'D'}; }
+      if (x<lateBias) return {d,c:'L',in:'08:'+pad2(16+Math.floor(rr()*30))};
+      if (x<lateBias+0.035) return {d,c:'V',t:rr()<0.7?'ลาป่วย':'ลากิจส่วนตัว'};
+      if (x<lateBias+0.055) return {d,c:'D'};
+      if (x<lateBias+0.062) return {d,c:'A'};
+      return {d,c:'P',in:'07:'+pad2(10+Math.floor(rr()*48))};
+    });
+  });
+  // today's seeded arrivals
+  const seed = {}; const noShow = ['M03','F04'];
+  staff.forEach((s,i)=>{ if (s.id==='T01'||noShow.includes(s.id)) return;
+    const late = ['O03','E03','W03','H02','A03','M04'].includes(s.id);
+    const m = late ? 8*60+16+Math.floor(r()*28) : 7*60+5+Math.floor(r()*62);
+    const t = pad2(Math.floor(m/60))+':'+pad2(m%60);
+    seed[s.id] = {in:t, st: m>toMin('08:15')?'สาย':'ปกติ', out: pad2(16)+':'+pad2(30+Math.floor(r()*40))};
+  });
+  const leaves = [
+    {id:'L1',uid:'S04',type:'ลาป่วย',from:TODAY,to:TODAY,reason:'เป็นไข้หวัด',at:'07:12',seed:true},
+    {id:'L2',uid:'W02',type:'ลากิจส่วนตัว',from:TODAY,to:nextWork(TODAY),reason:'ธุระครอบครัว',at:'เมื่อวาน',seed:true},
+    {id:'L3',uid:'E02',type:'ลาพักผ่อน',from:nextWork(TODAY),to:nextWork(nextWork(TODAY)),reason:'พักผ่อนประจำปี',at:'เมื่อวาน',seed:true},
+  ];
+  const duties = [
+    {id:'D1',uid:'O01',from:TODAY,to:TODAY,place:'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษา',order:'ที่ 412/2569',file:'คำสั่ง_412-2569.pdf',seed:true},
+    {id:'D2',uid:'G01',from:TODAY,to:nextWork(TODAY),place:'ค่ายลูกเสือจังหวัด',order:'ที่ 405/2569',file:'คำสั่ง_405-2569.pdf',seed:true},
+  ];
+  ['S04','W02','O01','G01'].forEach(id=>delete seed[id]);
+  return {staff, hist, seed, leaves, duties, att:{}, late:'08:15', radius:300, time:'08:05', loc:'in', events:[], synced:'08:00', newIds:new Set(),
+    view:{teacher:{tab:'home'}, hr:{tab:'today',open:{}}, exec:{tab:'over'}, admin:{tab:'staff',q:'',f:'all',open:null}},
+    draft:{leave:{type:'ลาป่วย',from:TODAY,to:TODAY,reason:''}, duty:{from:TODAY,to:TODAY,place:'',order:'',file:''}, outReason:''}};
+}
+S = fresh();
+
+const byId = id => S.staff.find(s=>s.id===id);
+const first = n => n.replace(/^(นางสาว|นาง|นาย)/,'').split(' ')[0];
+const short = n => n.replace(/^(นางสาว|นาง|นาย)/,'');
+const initial = n => short(n).charAt(0);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// status of a person today at the simulated time
+function todayStatus(s){
+  const du = S.duties.find(x=>x.uid===s.id && x.from<=TODAY && x.to>=TODAY);
+  if (du) return {k:'duty',label:'ไปราชการ',note:du.place};
+  const lv = S.leaves.find(x=>x.uid===s.id && x.from<=TODAY && x.to>=TODAY);
+  if (lv) return {k:'leave',label:lv.type,note:lv.reason};
+  const a = S.att[s.id];
+  if (a) return {k:a.st==='สาย'?'late':'ok',label:a.st,in:a.in,out:a.out};
+  const sd = S.seed[s.id];
+  if (sd && toMin(sd.in)<=toMin(S.time)) return {k:sd.st==='สาย'?'late':'ok',label:sd.st,in:sd.in,out:toMin(sd.out)<=toMin(S.time)?sd.out:''};
+  return {k:'wait',label:toMin(S.time)>=toMin('12:00')?'ขาด':'ยังไม่ลงเวลา'};
+}
+const PILL = {ok:'s-ok',late:'s-late',leave:'s-leave',duty:'s-duty',wait:'s-wait'};
+function counts(list){ const c={ok:0,late:0,leave:0,duty:0,wait:0,total:list.length}; list.forEach(s=>c[todayStatus(s).k]++); return c; }
+const active = () => S.staff.filter(s=>s.active);
+
+// feed: seeded arrivals + real events
+function feed(){
+  const f = [];
+  Object.entries(S.seed).forEach(([id,v])=>{ const s=byId(id); if(s && s.active && toMin(v.in)<=toMin(S.time)) f.push({t:v.in,who:id,txt:'ลงเวลามา',k:v.st==='สาย'?'late':'ok',lab:v.st}); });
+  S.leaves.filter(l=>l.seed && l.from===TODAY).forEach(l=>f.push({t:l.at==='เมื่อวาน'?'00:00':l.at,who:l.uid,txt:'แจ้ง'+l.type,k:'leave',lab:'ลา'}));
+  S.events.forEach(e=>f.push(e));
+  return f.sort((a,b)=>(b.seq||0)-(a.seq||0) || toMin(b.t)-toMin(a.t));
+}
+let SEQ = 1;
+function log(who,txt,k,lab){ S.events.push({t:S.time,who,txt,k,lab,seq:1e6+SEQ++}); }
+
+// ===================== ICONS =====================
+const IC = {
+ home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/>',
+ scan:'<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="10.5" r="3"/><path d="M7.5 17c1-2 2.6-3 4.5-3s3.5 1 4.5 3"/>',
+ out:'<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="m15 8 4 4-4 4M9 12h10"/>',
+ leave:'<rect x="4.5" y="5" width="15" height="15" rx="2"/><path d="M8.5 3v4M15.5 3v4M4.5 10h15M8 14h8"/>',
+ duty:'<rect x="4" y="5" width="16" height="12" rx="3"/><path d="M4 12h16M8 5V3h8v2M7 17v3M17 17v3"/>',
+ hist:'<path d="M4 20h16"/><rect x="5.5" y="12" width="3" height="6" rx=".8"/><rect x="10.5" y="8" width="3" height="10" rx=".8"/><rect x="15.5" y="4.5" width="3" height="13.5" rx=".8"/>',
+ today:'<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>',
+ doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
+ sum:'<path d="M4 19h16M7 16V9M12 16V5M17 16v-4"/>',
+ rank:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/>',
+ users:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.8-3 3-4.6 5.5-4.6s4.7 1.6 5.5 4.6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.6c2 .1 3.6 1.4 4.3 3.9"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>',
+ pin:'<path d="M12 21s-6-5.6-6-10.5A6 6 0 0 1 18 10.5C18 15.4 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.2"/>',
+ clip:'<path d="m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.4 3.4 0 0 1 4.8 4.8l-8.4 8.4a1.7 1.7 0 0 1-2.4-2.4L15 7"/>',
+ check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+ x:'<path d="M6 6l12 12M18 6 6 18"/>',
+ sync:'<path d="M20 11a8 8 0 0 0-14.3-4.3L4 9M4 4v5h5M4 13a8 8 0 0 0 14.3 4.3L20 15M20 20v-5h-5"/>',
+ chev:'<path d="m9 6 6 6-6 6"/>'
+};
+const ic = (n,c='') => `<svg viewBox="0 0 24 24" class="${c}" aria-hidden="true">${IC[n]}</svg>`;
+const av = s => `<div class="av" style="background:${s.col}">${esc(initial(s.name))}</div>`;
+const pill = (k,label) => `<span class="pill ${PILL[k]||'s-wait'}">${esc(label)}</span>`;
+
+// ===================== PHONE SHELLS =====================
+const ROLES = [
+  {key:'teacher', title:'ครูกลุ่มสาระภาษาไทย', tabs:[['home','หน้าหลัก','home'],['leave','แจ้งลา','leave'],['duty','ไปราชการ','duty'],['hist','ประวัติ','hist']]},
+  {key:'hr', title:'เจ้าหน้าที่ฝ่ายบุคคล', tabs:[['today','วันนี้','today'],['lv','ลา/ราชการ','leave'],['sum','สรุปครึ่งปี','sum']]},
+  {key:'exec', title:'ผู้บริหาร', tabs:[['over','ภาพรวม','today'],['rank','กลุ่มสาระ','rank']]},
+  {key:'admin', title:'ผู้ดูแลระบบ', tabs:[['staff','บุคลากร','users'],['set','ตั้งค่า','gear']]},
+];
+const track = document.getElementById('track');
+track.innerHTML = ROLES.map(r=>{ const me=byId(ME[r.key]); return `
+  <div class="slot" data-role="${r.key}">
+    <div class="slot-h"><b>${r.title}</b><span>${esc(me.name)} · ${esc(me.pos)}</span></div>
+    <div class="phone" id="ph-${r.key}">
+      <div class="scr">
+        <div class="sbar"><span class="clock"></span><span class="isl"></span><span class="sig"><svg viewBox="0 0 16 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.3" y="5.5" width="3" height="6.5" rx="1"/><rect x="8.6" y="3" width="3" height="9" rx="1"/><rect x="12.9" y="0" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="liff"><span class="x">✕</span><span class="tt">ลงเวลาปฏิบัติงาน<small>${SCHOOL}</small></span><span class="mut">•••</span></div>
+        <div class="screen"></div>
+        <nav class="bnav">${r.tabs.map(t=>`<button type="button" data-act="tab" data-role="${r.key}" data-tab="${t[0]}">${ic(t[2])}<span>${t[1]}</span></button>`).join('')}</nav>
+        <div class="notif" aria-live="polite"><div class="lg">LINE</div><div><b></b><span></span></div></div>
+        <div class="ovl"></div>
+      </div>
+    </div>
+  </div>`; }).join('');
+
+// ===================== VIEWS =====================
+const V = {};
+
+// ---------- TEACHER ----------
+V.teacher = () => {
+  const me = byId(ME.teacher), tab = S.view.teacher.tab;
+  if (!me.active) return `<div class="pad"><div class="card" style="text-align:center;padding:24px 14px"><h3 style="justify-content:center">บัญชีนี้ถูกระงับการใช้งาน</h3><p class="mut">กรุณาติดต่อฝ่ายบุคคล</p></div></div>`;
+  if (tab==='leave') return tLeave(me);
+  if (tab==='duty') return tDuty(me);
+  if (tab==='hist') return tHist(me);
+  const st = todayStatus(me), a = S.att[me.id];
+  const inS = S.loc==='in';
+  const dist = inS ? '85 ม.' : '4.62 กม.';
+  let status;
+  if (st.k==='duty') status = `<div class="row"><div><b>วันนี้ไปราชการ</b><div class="mut">${esc(st.note)}</div></div>${pill('duty','ไปราชการ')}</div>`;
+  else if (st.k==='leave') status = `<div class="row"><div><b>วันนี้${esc(st.label)}</b><div class="mut">${esc(st.note||'')}</div></div>${pill('leave','ลา')}</div>`;
+  else if (a) status = `<div class="grid2"><div><div class="mut">เวลามา</div><div style="font:700 22px var(--display)">${a.in} ${pill(a.st==='สาย'?'late':'ok',a.st)}</div></div><div><div class="mut">เวลากลับ</div><div style="font:700 22px var(--display)">${a.out||'—'}</div>${a.outReason?`<div class="mut">นอกโรงเรียน ${esc(a.dist)} · ${esc(a.outReason)}</div>`:''}</div></div>`;
+  else status = `<div class="row"><div><b>ยังไม่ได้ลงเวลามา</b><div class="mut">มาหลัง ${S.late} น. ถือว่าสาย</div></div>${pill('wait','รอลงเวลา')}</div>`;
+  const busy = st.k==='duty'||st.k==='leave';
+  const outForm = S.view.teacher.outAsk ? `<div class="card" style="border-color:#F5B7B7"><h3>อยู่นอกโรงเรียน ${dist}</h3><p class="mut" style="margin:0 0 6px">ระบุเหตุผลการลงเวลากลับนอกพื้นที่</p><textarea class="inp" id="t-outr" data-draft="outReason" placeholder="เช่น ออกไปประชุมผู้ปกครองที่ อบต.">${esc(S.draft.outReason)}</textarea><div class="grid2" style="margin-top:8px"><button class="btn ln" type="button" data-act="outCancel">ยกเลิก</button><button class="btn dk" type="button" data-act="outReason">บันทึกพร้อมเหตุผล</button></div></div>` : '';
+  return `<div class="pad">
+    <div class="hero"><small>สวัสดี</small><div class="nm">${esc(short(me.name))}</div><div class="mut" style="color:#FFE4D2">${esc(me.pos)} · ${esc(DEPT_FULL(me.dept))}</div><div class="clk">${S.time}</div><div class="dt">${thLong(TODAY)}</div></div>
+    <div class="card" id="t-status">${status}</div>
+    <div class="loc ${inS?'in':'out'}">${ic('pin')}<span>${inS?`อยู่ในโรงเรียน · ห่างจุดกลาง ${dist} (รัศมี ${S.radius} ม.)`:`อยู่นอกโรงเรียน · ห่าง ${dist}`}</span></div>
+    ${!me.face ? `<button class="btn pri" type="button" data-act="regFace">${ic('scan')}ลงทะเบียนใบหน้าใหม่</button><p class="mut" style="margin:0;text-align:center">ผู้ดูแลระบบรีเซ็ตใบหน้าของคุณ กรุณาสแกนใหม่</p>` :
+    `<button class="btn pri" type="button" data-act="checkin" ${a||busy?'disabled':''}>${ic('scan')}สแกนใบหน้า ลงเวลามา</button>
+     <button class="btn dk" type="button" data-act="checkout" ${!a||a.out||busy?'disabled':''}>${ic('out')}ลงเวลากลับ</button>`}
+    ${outForm}
+    <div class="grid3">
+      <button class="qk" type="button" data-act="tab" data-role="teacher" data-tab="leave">${ic('leave')}แจ้งลา</button>
+      <button class="qk" type="button" data-act="tab" data-role="teacher" data-tab="duty">${ic('duty')}ไปราชการ</button>
+      <button class="qk" type="button" data-act="tab" data-role="teacher" data-tab="hist">${ic('hist')}ประวัติ</button>
+    </div>
+  </div>`;
+};
+function tLeave(me){
+  const d = S.draft.leave; const mine = S.leaves.filter(l=>l.uid===me.id).slice().reverse();
+  return `<div class="pad">
+    <div class="card"><h3>แจ้งลา <small>ตามระเบียบการลาของข้าราชการ</small></h3>
+      <label class="lbl2" for="lv-type">ประเภทการลา</label>
+      <select class="inp" id="lv-type" data-draft="leave.type">${LEAVE_TYPES.map((t,i)=>`<option value="${t[0]}" ${d.type===t[0]?'selected':''}>${i+1}. ${t[0]}</option>`).join('')}</select>
+      <div class="grid2" style="margin-top:6px"><div><label class="lbl2" for="lv-from">ตั้งแต่</label><input class="inp" type="date" id="lv-from" data-draft="leave.from" value="${d.from}"></div><div><label class="lbl2" for="lv-to">ถึง</label><input class="inp" type="date" id="lv-to" data-draft="leave.to" value="${d.to}"></div></div>
+      <label class="lbl2" for="lv-reason" style="margin-top:6px">เหตุผล</label>
+      <textarea class="inp" id="lv-reason" data-draft="leave.reason" placeholder="เช่น ไปพบแพทย์ตามนัด">${esc(d.reason)}</textarea>
+      <button class="btn pri" style="margin-top:10px" type="button" data-act="leave">${ic('check')}ส่งแจ้งการลา</button>
+    </div>
+    <div class="card"><h3>การลาของฉัน</h3>${mine.length?`<div class="list">${mine.map(l=>`<div class="li"><div class="t"><b>${esc(l.type)}</b><span>${thDate(l.from)}${l.to!==l.from?' – '+thDate(l.to):''} · ${esc(l.reason||'-')}</span></div>${l.from>TODAY?`<button class="btn ln sm" type="button" data-act="cancelLeave" data-id="${l.id}">ยกเลิก</button>`:pill('leave','บันทึกแล้ว')}</div>`).join('')}</div>`:'<div class="empty">ยังไม่มีการลาที่แจ้งในเดโม</div>'}</div>
+  </div>`;
+}
+function tDuty(me){
+  const d = S.draft.duty; const mine = S.duties.filter(x=>x.uid===me.id).slice().reverse();
+  return `<div class="pad">
+    <div class="card"><h3>บันทึกไปราชการ <small>วันที่ไปราชการไม่ต้องลงเวลา</small></h3>
+      <div class="grid2"><div><label class="lbl2" for="du-from">ตั้งแต่</label><input class="inp" type="date" id="du-from" data-draft="duty.from" value="${d.from}"></div><div><label class="lbl2" for="du-to">ถึง</label><input class="inp" type="date" id="du-to" data-draft="duty.to" value="${d.to}"></div></div>
+      <label class="lbl2" for="du-place" style="margin-top:6px">สถานที่</label><input class="inp" id="du-place" data-draft="duty.place" placeholder="เช่น สพม. อบรมหลักสูตรฐานสมรรถนะ" value="${esc(d.place)}">
+      <label class="lbl2" for="du-order" style="margin-top:6px">เลขที่คำสั่ง</label><input class="inp" id="du-order" data-draft="duty.order" placeholder="เช่น ที่ 418/2569" value="${esc(d.order)}">
+      <span class="lbl2" style="margin-top:6px">ไฟล์คำสั่ง (PDF 1 ไฟล์ ไม่เกิน 5 MB)</span>
+      <button class="att" type="button" data-act="attach">${ic('clip')}<span>${d.file?esc(d.file)+' · 412 KB':'แตะเพื่อแนบไฟล์คำสั่ง'}</span></button>
+      <button class="btn pri" style="margin-top:10px" type="button" data-act="duty">${ic('check')}บันทึกไปราชการ</button>
+    </div>
+    <div class="card"><h3>รายการไปราชการ</h3>${mine.length?`<div class="list">${mine.map(x=>`<div class="li"><div class="t"><b>${esc(x.place)}</b><span>${thDate(x.from)}${x.to!==x.from?' – '+thDate(x.to):''} · คำสั่ง${esc(x.order)}</span></div>${pill('duty','PDF')}</div>`).join('')}</div>`:'<div class="empty">ยังไม่มีรายการ</div>'}</div>
+  </div>`;
+}
+function tHist(me){
+  const h = S.hist[me.id].slice();
+  const st = todayStatus(me);
+  const rows = h.slice(-9).reverse();
+  const c = {P:0,L:0,V:0,D:0,A:0}; h.forEach(x=>c[x.c]++);
+  if (st.k==='ok') c.P++; if (st.k==='late') c.L++; if (st.k==='duty') c.D++; if (st.k==='leave') c.V++;
+  const used = t => h.filter(x=>x.c==='V'&&x.t===t).length + S.leaves.filter(l=>l.uid===me.id&&l.type===t&&!l.seed).reduce((n,l)=>n+spanDays(l.from,l.to),0);
+  const cmap = {P:['ok','มา'],L:['late','สาย'],V:['leave','ลา'],D:['duty','ไปราชการ'],A:['wait','ขาด']};
+  return `<div class="pad">
+    <div class="card"><h3>ปีงบประมาณ ${FY_BE} <small>ตั้งแต่ 1 ต.ค. ถึงวันนี้</small></h3>
+      <div class="grid3" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat s-ok"><b>${c.P+c.L}</b><span>มา</span></div><div class="stat s-late"><b>${c.L}</b><span>สาย</span></div><div class="stat s-leave"><b>${c.V}</b><span>ลา</span></div><div class="stat s-duty"><b>${c.D}</b><span>ราชการ</span></div>
+      </div></div>
+    <div class="card"><h3>วันลาที่ใช้ไป</h3>${['ลาป่วย','ลากิจส่วนตัว','ลาพักผ่อน'].map(t=>{const lim=LEAVE_TYPES.find(x=>x[0]===t)[1],u=used(t);return `<div style="margin:6px 0"><div class="row" style="font-size:12.5px"><span>${t}</span><span class="mut">${u} / ${lim} วัน</span></div><div class="bar"><i style="width:${Math.min(100,u/lim*100)}%"></i></div></div>`}).join('')}</div>
+    <div class="card"><h3>ล่าสุด</h3><div class="list">
+      <div class="li"><div class="t"><b>${thDate(TODAY,{weekday:'short',day:'numeric',month:'short'})} (วันนี้)</b><span>${st.in?'มา '+st.in+(st.out?' · กลับ '+st.out:''):esc(st.note||'')}</span></div>${pill(st.k,st.label)}</div>
+      ${rows.map(x=>`<div class="li"><div class="t"><b>${thDate(x.d,{weekday:'short',day:'numeric',month:'short'})}</b><span>${x.in?'มา '+x.in:x.c==='V'?x.t:x.c==='D'?'อบรมตามคำสั่ง สพม.':'—'}</span></div>${pill(cmap[x.c][0],cmap[x.c][1])}</div>`).join('')}
+    </div></div>
+  </div>`;
+}
+const spanDays = (a,b) => { let n=0,d=a; while(d<=b){ if(isWork(new Date(d+'T12:00:00'))) n++; d=addDays(d,1);} return n; };
+
+// ---------- HR ----------
+V.hr = () => {
+  const tab = S.view.hr.tab;
+  if (tab==='lv') return hrLeave();
+  if (tab==='sum') return hrSum();
+  const list = active(), c = counts(list);
+  const W = k => (c[k]/c.total*100).toFixed(1)+'%';
+  const missing = DEPTS.map(d=>{ const ppl=list.filter(s=>s.dept===d); const nm=ppl.filter(s=>!['ok','late'].includes(todayStatus(s).k)); return {d,ppl,nm}; }).filter(x=>x.ppl.length);
+  return `<div class="pad">
+    <div class="hero navy"><small>ฝ่ายบริหารงานบุคคล</small><div class="nm">${thLong(TODAY)}</div><div class="dt">ข้อมูล ณ เวลา ${S.time} น. · บุคลากร ${c.total} คน</div></div>
+    <div class="card" id="hr-stats">
+      <div class="sbar2"><i style="width:${W('ok')};background:var(--ok)"></i><i style="width:${W('late')};background:var(--late)"></i><i style="width:${W('leave')};background:var(--leave)"></i><i style="width:${W('duty')};background:var(--duty)"></i></div>
+      <div class="grid3" style="grid-template-columns:repeat(5,1fr);margin-top:8px;gap:4px">
+        <div class="stat s-ok"><b>${c.ok}</b><span>ปกติ</span></div><div class="stat s-late"><b>${c.late}</b><span>สาย</span></div><div class="stat s-leave"><b>${c.leave}</b><span>ลา</span></div><div class="stat s-duty"><b>${c.duty}</b><span>ราชการ</span></div><div class="stat s-wait"><b>${c.wait}</b><span>ยังไม่มา</span></div>
+      </div>
+    </div>
+    <div class="row"><b style="font:600 14.5px var(--display)">ใครยังไม่มา แยกกลุ่มสาระ/งาน</b><button class="btn ln sm" type="button" data-act="pdf" data-kind="daily">${ic('doc')}PDF</button></div>
+    ${missing.map(x=>{ const open=S.view.hr.open[x.d]; return `<div class="dept ${open?'open':''}"><button type="button" data-act="dept" data-d="${esc(x.d)}"><span class="n">${esc(DEPT_FULL(x.d))}</span>${x.nm.length?`<span class="pill s-bad">${x.nm.length}</span>`:`<span class="pill s-ok">ครบ ${x.ppl.length}</span>`}${ic('chev','chev')}</button>${open?`<div class="body list">${x.ppl.map(s=>{const t=todayStatus(s);return `<div class="li">${av(s)}<div class="t"><b>${esc(short(s.name))}</b><span>${t.in?'มา '+t.in:esc(s.pos)}</span></div>${pill(t.k,t.k==='leave'?'ลา':t.label)}</div>`}).join('')}</div>`:''}</div>`; }).join('')}
+  </div>`;
+};
+function hrLeave(){
+  const today = [...S.duties.map(x=>({...x,kind:'duty'})),...S.leaves.map(x=>({...x,kind:'leave'}))].filter(x=>byId(x.uid).active).sort((a,b)=>(S.newIds.has(b.id)?1:0)-(S.newIds.has(a.id)?1:0) || a.from.localeCompare(b.from));
+  return `<div class="pad">
+    <div class="card"><h3>การลาและไปราชการ <small>${today.length} รายการ</small></h3><div class="list">${today.map(x=>{const s=byId(x.uid);return `<div class="li ${S.newIds.has(x.id)?'new':''}" style="${S.newIds.has(x.id)?'margin:0 -12px;padding:8px 12px':''}">${av(s)}<div class="t"><b>${esc(short(s.name))}${S.newIds.has(x.id)?' <span class="pill" style="background:var(--a-o);color:#fff">ใหม่</span>':''}</b><span>${x.kind==='duty'?esc(x.place)+' · คำสั่ง'+esc(x.order):esc(x.type)+' · '+esc(x.reason||'-')}</span><span>${thDate(x.from)}${x.to!==x.from?' – '+thDate(x.to):''} · ${esc(DEPT_FULL(s.dept))}</span></div>${pill(x.kind,x.kind==='duty'?'ราชการ':'ลา')}</div>`}).join('')}</div></div>
+    <p class="mut" style="margin:0;text-align:center">ไฟล์คำสั่งไปราชการเก็บในระบบ เปิดดูได้จาก Google Sheet</p>
+  </div>`;
+}
+function deptSummary(){
+  return DEPTS.map(d=>{ const ppl=active().filter(s=>s.dept===d); let P=0,L=0,Vv=0,D=0,A=0;
+    ppl.forEach(s=>{ S.hist[s.id].forEach(x=>{ if(x.c==='P')P++; else if(x.c==='L')L++; else if(x.c==='V')Vv++; else if(x.c==='D')D++; else A++; }); const t=todayStatus(s).k; if(t==='ok')P++; if(t==='late')L++; if(t==='leave')Vv++; if(t==='duty')D++; });
+    const tot=P+L+Vv+D+A; return {d,n:ppl.length,P,L,V:Vv,D,A,rate:tot?(P+L+D)/tot*100:0,ontime:(P+L)?P/(P+L)*100:0}; }).filter(x=>x.n);
+}
+function hrSum(){
+  const rows = deptSummary();
+  return `<div class="pad">
+    <div class="card"><h3>สรุปครึ่งปีแรก ${FY_BE} <small>1 ต.ค. – วันนี้ · ${PAST.length+1} วันทำการ</small></h3>
+      <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>กลุ่มสาระ/งาน</th><th>คน</th><th>มา%</th><th>สาย</th><th>ลา</th><th>ขาด</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td>${esc(r.d)}</td><td>${r.n}</td><td>${r.rate.toFixed(1)}</td><td>${r.L}</td><td>${r.V}</td><td>${r.A}</td></tr>`).join('')}
+      </tbody></table></div></div>
+    <div class="grid2"><button class="btn ln" type="button" data-act="pdf" data-kind="sum">${ic('doc')}PDF แยกกลุ่มสาระ</button><button class="btn dk" type="button" data-act="pdf" data-kind="org">${ic('doc')}PDF ทั้งองค์กร</button></div>
+    <p class="mut" style="margin:0;text-align:center">ข้อมูลซิงก์เข้า Google Sheet ของโรงเรียนทุก 5 นาที</p>
+  </div>`;
+}
+
+// ---------- EXEC ----------
+V.exec = () => {
+  if (S.view.exec.tab==='rank') return exRank();
+  const list = active(), c = counts(list);
+  const here = c.ok+c.late+c.duty, pct = Math.round(here/c.total*100);
+  const C = 2*Math.PI*48;
+  // trend: last 9 past days + today
+  const days = PAST.slice(-9);
+  const vals = days.map(d=>{ let p=0,n=0; list.forEach(s=>{ const x=S.hist[s.id].find(y=>y.d===d); if(!x) return; n++; if(['P','L','D'].includes(x.c)) p++; }); return n?p/n*100:0; });
+  vals.push(pct);
+  const lbl = [...days,TODAY].map(d=>new Date(d+'T12:00:00').getDate());
+  const bw = 22, gap = 6, h = 90, x0 = 26, y0 = 8;
+  const yv = v => y0 + h - (v-60)/40*h; // axis 60–100%
+  const bars = vals.map((v,i)=>`<rect x="${x0+i*(bw+gap)}" y="${yv(Math.max(60,v)).toFixed(1)}" width="${bw}" height="${(y0+h-yv(Math.max(60,v))).toFixed(1)}" rx="4" fill="${i===vals.length-1?'#F26A1B':'#CBD2DA'}"/><text x="${x0+i*(bw+gap)+bw/2}" y="${y0+h+13}" font-size="10" text-anchor="middle" fill="#6B7280">${lbl[i]}</text>`).join('');
+  const grid = [60,80,100].map(g=>`<line x1="${x0-4}" x2="${x0+vals.length*(bw+gap)}" y1="${yv(g)}" y2="${yv(g)}" stroke="#E5E7EB"/><text x="${x0-7}" y="${yv(g)+3}" font-size="9.5" text-anchor="end" fill="#6B7280">${g}</text>`).join('');
+  const f = feed().filter(e=>byId(e.who)&&byId(e.who).active).slice(0,7);
+  return `<div class="pad">
+    <div class="card"><div class="row" style="gap:12px">
+      <div class="ring"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="48" fill="none" stroke="#EEF0F3" stroke-width="11"/><circle cx="55" cy="55" r="48" fill="none" stroke="#16A34A" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(C*here/c.total).toFixed(1)} ${C.toFixed(1)}"/></svg><div class="c"><div><b>${pct}%</b><span>ปฏิบัติงาน</span></div></div></div>
+      <div style="flex:1;min-width:0;display:grid;gap:4px;font-size:12.5px">
+        <div class="row"><span>มาปกติ</span><b>${c.ok}</b></div><div class="row"><span>มาสาย</span><b style="color:var(--late)">${c.late}</b></div><div class="row"><span>ไปราชการ</span><b style="color:var(--duty)">${c.duty}</b></div><div class="row"><span>ลา</span><b style="color:var(--leave)">${c.leave}</b></div><div class="row"><span>ยังไม่มา</span><b>${c.wait}</b></div>
+      </div></div>
+      <div class="mut" style="margin-top:6px">บุคลากรทั้งหมด ${c.total} คน · ณ ${S.time} น.</div>
+    </div>
+    <div class="card"><h3>อัตราการปฏิบัติงาน 10 วันทำการ <small>%</small></h3>
+      <svg viewBox="0 0 ${x0+vals.length*(bw+gap)} ${y0+h+18}" width="100%" role="img" aria-label="กราฟอัตราการมาปฏิบัติงานรายวัน">${grid}${bars}</svg></div>
+    <div class="card feed"><h3>กิจกรรมล่าสุด <small>อัปเดตทันที</small></h3><div class="list">${f.map(e=>{const s=byId(e.who);return `<div class="li ${e.seq?'new':''}" style="${e.seq?'margin:0 -12px;padding:8px 12px':''}"><span class="tm">${e.t==='00:00'?'—':e.t}</span><div class="t"><b>${esc(short(s.name))}</b><span>${esc(e.txt)} · ${esc(s.dept)}</span></div>${pill(e.k,e.lab)}</div>`}).join('')}</div></div>
+  </div>`;
+};
+function exRank(){
+  const rows = deptSummary().sort((a,b)=>b.ontime-a.ontime);
+  return `<div class="pad">
+    <div class="card"><h3>มาตรงเวลา แยกกลุ่มสาระ/งาน <small>ปีงบ ${FY_BE}</small></h3>
+      ${rows.map((r,i)=>`<div style="margin:8px 0"><div class="row" style="font-size:12.5px"><span><b style="color:var(--a-mut);font-variant-numeric:tabular-nums">${i+1}.</b> ${esc(r.d)}</span><b style="font-variant-numeric:tabular-nums">${r.ontime.toFixed(1)}%</b></div><div class="bar"><i style="width:${r.ontime}%;background:${r.ontime>=93?'var(--ok)':r.ontime>=88?'var(--late)':'var(--bad)'}"></i></div></div>`).join('')}
+    </div>
+    <button class="btn dk" type="button" data-act="pdf" data-kind="org">${ic('doc')}ส่งออก PDF ทั้งองค์กร</button>
+  </div>`;
+}
+
+// ---------- ADMIN ----------
+V.admin = () => {
+  if (S.view.admin.tab==='set') return adSet();
+  const v = S.view.admin, q = v.q.trim();
+  const list = S.staff.filter(s=>(v.f==='all'||(v.f==='off'?!s.active:s.role===v.f)) && (!q || s.name.includes(q) || s.dept.includes(q)));
+  const f = [['all','ทั้งหมด'],['hr','ฝ่ายบุคคล'],['exec','ผู้บริหาร'],['admin','ผู้ดูแล'],['off','ถูกระงับ']];
+  return `<div class="pad">
+    <div class="card" style="padding:10px"><input class="inp" id="ad-q" data-draft="adminQ" placeholder="ค้นหาชื่อหรือกลุ่มสาระ" value="${esc(v.q)}">
+      <div class="chips" style="margin-top:8px">${f.map(x=>`<button type="button" class="${v.f===x[0]?'on':''}" data-act="afilter" data-f="${x[0]}">${x[1]}</button>`).join('')}</div></div>
+    <div class="card"><h3>บุคลากร <small>${list.length} จาก ${S.staff.length} คน</small></h3><div class="list">
+    ${list.map(s=>{ const open=v.open===s.id; return `<div>
+      <div class="li" data-act="aopen" data-id="${s.id}" style="cursor:pointer">${av(s)}<div class="t"><b style="${s.active?'':'color:var(--a-mut);text-decoration:line-through'}">${esc(short(s.name))}</b><span>${esc(s.dept)} · ${s.face?'มีใบหน้า':'<b style="color:var(--bad)">ยังไม่มีใบหน้า</b>'}</span></div>${s.role!=='teacher'?pill(s.role==='admin'?'late':s.role==='exec'?'duty':'leave',ROLE_NAME[s.role]):''}</div>
+      ${open?`<div style="background:var(--a-bg);border-radius:12px;padding:10px;margin-bottom:8px;display:grid;gap:8px">
+        <div><label class="lbl2" for="ad-role-${s.id}">บทบาท</label><select class="inp" id="ad-role-${s.id}" data-act-change="role" data-id="${s.id}">${Object.entries(ROLE_NAME).map(([k,n])=>`<option value="${k}" ${s.role===k?'selected':''}>${n}</option>`).join('')}</select></div>
+        <div class="row"><span style="font-size:13px">เปิดใช้งานบัญชี</span><button class="sw" type="button" role="switch" aria-checked="${s.active}" aria-label="เปิดใช้งานบัญชี" data-act="toggleActive" data-id="${s.id}"></button></div>
+        <button class="btn ln sm" style="width:100%" type="button" data-act="resetFace" data-id="${s.id}" ${s.face?'':'disabled'}>รีเซ็ตใบหน้า (ให้สแกนลงทะเบียนใหม่)</button>
+      </div>`:''}</div>`; }).join('')}
+    </div></div>
+  </div>`;
+};
+function adSet(){
+  const opt = (vals,cur,fmt) => vals.map(x=>`<option value="${x}" ${String(cur)===String(x)?'selected':''}>${fmt?fmt(x):x}</option>`).join('');
+  return `<div class="pad">
+    <div class="card"><h3>เวลาและพื้นที่</h3>
+      <label class="lbl2" for="set-late">มาหลังเวลานี้ = สาย</label><select class="inp" id="set-late" data-act-change="late">${opt(['07:45','08:00','08:15','08:30'],S.late,x=>x+' น.')}</select>
+      <label class="lbl2" for="set-rad" style="margin-top:6px">รัศมีโรงเรียน</label><select class="inp" id="set-rad" data-act-change="radius">${opt([100,200,300,500],S.radius,x=>x+' เมตร')}</select>
+      <div class="loc in" style="margin-top:8px">${ic('pin')}<span>พิกัดโรงเรียน 13.3611, 100.9847</span></div></div>
+    <div class="card"><h3>ปีงบประมาณ ${FY_BE}</h3>
+      <div class="row" style="font-size:13px"><span>ครึ่งปีแรก</span><b>1 ต.ค. ${FY_BE-1} – 31 มี.ค. ${FY_BE}</b></div>
+      <div class="row" style="font-size:13px;margin-top:4px"><span>ครึ่งปีหลัง</span><b>1 เม.ย. – 30 ก.ย. ${FY_BE}</b></div></div>
+    <div class="card"><h3>Google Sheet ของโรงเรียน</h3>
+      <div class="row"><div><b style="font-size:13px">${S.syncing?'กำลังซิงก์…':'ซิงก์อัตโนมัติทุก 5 นาที'}</b><div class="mut">ล่าสุด ${S.synced} น. · ${S.staff.length} บุคลากร · ${Object.keys(S.att).length+Object.values(S.seed).filter(v=>toMin(v.in)<=toMin(S.time)).length} รายการวันนี้</div></div>
+      <button class="btn ln sm" type="button" data-act="sync" ${S.syncing?'disabled':''}>${ic('sync')}ซิงก์</button></div></div>
+    <div class="card"><h3>สิ้นปีงบประมาณ</h3><p class="mut" style="margin:0">สำรองข้อมูลทั้งปีเป็นไฟล์ใน Google Drive แล้วเริ่มปีใหม่ รายชื่อและใบหน้าครูยังอยู่ครบ</p></div>
+  </div>`;
+}
+
+// ===================== RENDER =====================
+function renderPhone(role){
+  const ph = document.getElementById('ph-'+role); const sc = ph.querySelector('.screen');
+  const y = sc.scrollTop, act = document.activeElement, aid = act && ph.contains(act) ? act.id : null, sel = aid && act.selectionStart;
+  sc.innerHTML = V[role]();
+  sc.scrollTop = y;
+  if (aid){ const e = document.getElementById(aid); if (e){ e.focus({preventScroll:true}); try{ if(sel!=null) e.setSelectionRange(sel,sel);}catch(_){} } }
+  ph.querySelectorAll('.bnav button').forEach(b=>b.classList.toggle('on', b.dataset.tab===S.view[role].tab));
+  ph.querySelector('.clock').textContent = S.time;
+}
+function renderAll(){ ROLES.forEach(r=>renderPhone(r.key)); renderCtl(); }
+function renderCtl(){
+  document.getElementById('segTime').innerHTML = TIMES.map(t=>`<button type="button" aria-pressed="${S.time===t}" data-time="${t}">${t}</button>`).join('');
+  document.getElementById('segLoc').innerHTML = [['in','ในโรงเรียน'],['out','นอกโรงเรียน']].map(([k,n])=>`<button type="button" aria-pressed="${S.loc===k}" data-loc="${k}">${n}</button>`).join('');
+}
+
+// notifications into other phones
+const timers = {};
+function notify(roles, title, body){
+  roles.forEach((r,i)=>{ setTimeout(()=>{
+    const n = document.querySelector('#ph-'+r+' .notif'); n.querySelector('b').textContent = title; n.querySelector('span').textContent = body;
+    n.classList.add('show'); clearTimeout(timers[r]); timers[r] = setTimeout(()=>n.classList.remove('show'), 3800);
+    const tab = document.querySelector(`.rtab[data-i="${ROLES.findIndex(x=>x.key===r)}"]`); if (tab && !tab.querySelector('.ping')){ const p=document.createElement('span'); p.className='ping'; tab.appendChild(p); setTimeout(()=>p.remove(),4000); }
+  }, 250 + i*120); });
+}
+function flash(sel){ document.querySelectorAll(sel).forEach(e=>{ e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); }); }
+
+// ===================== SCAN OVERLAY =====================
+const FACE_SVG = `<svg class="face" viewBox="0 0 200 240" aria-hidden="true"><defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8B48F"/><stop offset="1" stop-color="#C98B63"/></linearGradient></defs><path d="M30 240c6-46 34-68 70-68s64 22 70 68z" fill="#33414F"/><rect x="84" y="150" width="32" height="34" rx="10" fill="#C98B63"/><ellipse cx="100" cy="104" rx="52" ry="64" fill="url(#sk)"/><path d="M46 100c-4-46 22-70 56-70 36 0 58 26 52 70-6-22-22-34-54-36-30 2-46 14-54 36z" fill="#1E1A18"/><ellipse class="eye" cx="80" cy="108" rx="6" ry="4.5" fill="#2A1F1A"/><ellipse class="eye" cx="120" cy="108" rx="6" ry="4.5" fill="#2A1F1A"/><path d="M88 140q12 8 24 0" stroke="#8A4B3A" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+function scan(role, onDone, title){
+  const ov = document.querySelector('#ph-'+role+' .ovl');
+  ov.innerHTML = `<div class="sheet scan"><div class="tp"><b>${title||'สแกนใบหน้า'}</b><button class="xb" type="button" data-x>✕ ยกเลิก</button></div>
+   <div class="cam">${FACE_SVG}<div class="oval"></div><div class="line"></div><div class="hud"><span class="chip on" data-s="1">① พบใบหน้า</span><span class="chip" data-s="2">② อ่านใบหน้า</span><span class="chip" data-s="3">③ ยืนยันตัวจริง</span></div></div>
+   <div class="bt"><div class="msg">กำลังค้นหาใบหน้า…</div><div class="pb"><i></i></div></div></div>`;
+  const q = s => ov.querySelector(s); let alive = true;
+  q('[data-x]').onclick = () => { alive=false; ov.innerHTML=''; };
+  const steps = [
+    [700,()=>{ q('[data-s="1"]').className='chip done'; q('[data-s="2"]').className='chip on'; q('.msg').textContent='พบใบหน้า กำลังอ่านใบหน้า…'; q('.pb i').style.width='40%'; q('.oval').classList.add('good'); }],
+    [1500,()=>{ q('[data-s="2"]').className='chip done'; q('[data-s="3"]').className='chip on'; q('.msg').textContent='หันหน้าเล็กน้อย แล้วกลับมามองตรง'; q('.pb i').style.width='70%'; q('.face').style.transition='transform .45s'; q('.face').style.transform='translate(-50%,-50%) rotateY(28deg)'; }],
+    [2200,()=>{ q('.face').style.transform='translate(-50%,-50%)'; }],
+    [2700,()=>{ q('[data-s="3"]').className='chip done'; q('.msg').textContent='ยืนยันตัวจริงแล้ว กำลังตรวจพิกัด…'; q('.pb i').style.width='100%'; }],
+    [3200,()=>{ ov.innerHTML=''; onDone(); }],
+  ];
+  steps.forEach(([t,f])=>setTimeout(()=>{ if(alive) f(); }, t));
+}
+function result(role, ok, title, msg, tone){
+  const ov = document.querySelector('#ph-'+role+' .ovl');
+  const col = tone || (ok ? 'var(--ok)' : 'var(--bad)');
+  ov.innerHTML = `<div class="sheet res"><div class="box"><div class="ic" style="background:${col}">${ic(ok?'check':'x')}</div><h4>${title}</h4><p>${msg}</p><button class="btn ${ok?'pri':'dk'}" style="margin-top:6px" type="button" data-x>ตกลง</button></div></div>`;
+  ov.querySelector('[data-x]').onclick = () => { ov.innerHTML=''; };
+}
+
+// ===================== ACTIONS =====================
+const A = {};
+A.tab = el => { const r=el.dataset.role; S.view[r].tab=el.dataset.tab; if(r==='hr' && el.dataset.tab==='today') {} renderPhone(r); document.querySelector('#ph-'+r+' .screen').scrollTop=0; };
+A.checkin = () => {
+  scan('teacher', () => {
+    if (S.loc!=='in'){ result('teacher', false, 'ลงเวลาไม่สำเร็จ', `คุณอยู่ห่างจากโรงเรียน 4.62 กม. ต้องอยู่ในรัศมี ${S.radius} เมตร จึงจะลงเวลามาได้ หากไปราชการให้ใช้เมนู “ไปราชการ”`); return; }
+    const st = toMin(S.time) > toMin(S.late) ? 'สาย' : 'ปกติ';
+    S.att.T01 = {in:S.time, st, out:''};
+    log('T01','ลงเวลามา', st==='สาย'?'late':'ok', st);
+    renderAll(); flash('#t-status,#hr-stats');
+    result('teacher', true, 'ลงเวลามาเรียบร้อย', `เวลา ${S.time} น. · สถานะ <b style="color:${st==='สาย'?'var(--late)':'var(--ok)'}">${st}</b><br>ระบบแจ้งฝ่ายบุคคลแล้ว`, st==='สาย'?'var(--late)':'var(--ok)');
+    notify(['hr','exec'], 'ระบบลงเวลา · '+SCHOOL, `ครูพิมพ์ชนก ลงเวลามา ${S.time} น. (${st})`);
+  });
+};
+A.regFace = () => scan('teacher', () => { byId('T01').face = true; renderAll(); result('teacher', true, 'บันทึกใบหน้าใหม่แล้ว', 'ใช้สแกนลงเวลาได้ทันที'); notify(['admin'],'ระบบลงเวลา','ครูพิมพ์ชนก ลงทะเบียนใบหน้าใหม่แล้ว'); }, 'ลงทะเบียนใบหน้า');
+A.checkout = () => {
+  const a = S.att.T01; if (!a) return;
+  if (toMin(S.time) < toMin(a.in)) { result('teacher', false, 'เวลาจำลองไม่ถูกต้อง', 'เลือกเวลาจำลองที่หลังเวลามาก่อน เช่น 16:35'); return; }
+  if (S.loc!=='in'){ S.view.teacher.outAsk = true; renderPhone('teacher'); setTimeout(()=>{ const t=document.getElementById('t-outr'); t && t.focus(); },50); return; }
+  a.out = S.time; log('T01','ลงเวลากลับ','ok','กลับ'); renderAll(); flash('#t-status');
+  result('teacher', true, 'ลงเวลากลับเรียบร้อย', `เวลา ${S.time} น. · ตรวจพิกัดในโรงเรียนแล้ว`);
+  notify(['hr'], 'ระบบลงเวลา', `ครูพิมพ์ชนก ลงเวลากลับ ${S.time} น.`);
+};
+A.outCancel = () => { S.view.teacher.outAsk=false; renderPhone('teacher'); };
+A.outReason = () => {
+  const r = S.draft.outReason.trim(); if (!r){ result('teacher', false, 'กรุณาระบุเหตุผล', 'การลงเวลากลับนอกโรงเรียนต้องระบุเหตุผลทุกครั้ง'); return; }
+  const a = S.att.T01; a.out=S.time; a.outReason=r; a.dist='4.62 กม.'; S.view.teacher.outAsk=false; S.draft.outReason='';
+  log('T01','ลงเวลากลับนอกโรงเรียน: '+r,'late','นอกพื้นที่'); renderAll(); flash('#t-status');
+  result('teacher', true, 'บันทึกเวลากลับแล้ว', `เวลา ${S.time} น. · ห่างโรงเรียน 4.62 กม.<br>เหตุผล: ${esc(r)}`);
+  notify(['hr','exec'], 'ระบบลงเวลา', `ครูพิมพ์ชนก ลงเวลากลับนอกโรงเรียน (4.62 กม.) · ${r}`);
+};
+A.leave = () => {
+  const d = S.draft.leave;
+  if (!d.from || !d.to || d.to < d.from){ result('teacher', false, 'วันที่ไม่ถูกต้อง', 'วันสิ้นสุดต้องไม่ก่อนวันเริ่มลา'); return; }
+  if (!d.reason.trim()){ result('teacher', false, 'กรุณาระบุเหตุผล', 'ใส่เหตุผลการลาสั้น ๆ ให้ฝ่ายบุคคลทราบ'); return; }
+  const id = 'L'+Date.now(); S.leaves.push({id,uid:'T01',type:d.type,from:d.from,to:d.to,reason:d.reason.trim(),at:S.time}); S.newIds.add(id);
+  log('T01','แจ้ง'+d.type+' '+thDate(d.from)+(d.to!==d.from?'–'+thDate(d.to):''),'leave','ลา');
+  S.draft.leave = {type:'ลาป่วย',from:TODAY,to:TODAY,reason:''};
+  renderAll(); flash('#hr-stats');
+  result('teacher', true, 'ส่งแจ้งการลาแล้ว', `${esc(d.type)} ${spanDays(d.from,d.to)} วันทำการ<br>ฝ่ายบุคคลได้รับข้อมูลแล้ว`, 'var(--leave)');
+  notify(['hr','exec'], 'แจ้งการลา · '+SCHOOL, `ครูพิมพ์ชนก ${d.type} ${thDate(d.from)}${d.to!==d.from?' – '+thDate(d.to):''}`);
+};
+A.cancelLeave = el => { S.leaves = S.leaves.filter(l=>l.id!==el.dataset.id); log('T01','ยกเลิกการลา','wait','ยกเลิก'); renderAll(); notify(['hr'],'แจ้งการลา','ครูพิมพ์ชนก ยกเลิกการลาล่วงหน้า'); };
+A.attach = () => { S.draft.duty.file = S.draft.duty.file ? '' : 'คำสั่งไปราชการ_418-2569.pdf'; renderPhone('teacher'); };
+A.duty = () => {
+  const d = S.draft.duty;
+  if (!d.place.trim() || !d.order.trim()){ result('teacher', false, 'ข้อมูลไม่ครบ', 'กรอกสถานที่และเลขที่คำสั่ง'); return; }
+  if (!d.file){ result('teacher', false, 'ยังไม่ได้แนบไฟล์', 'แนบไฟล์คำสั่งไปราชการ (PDF) 1 ไฟล์'); return; }
+  if (d.to < d.from){ result('teacher', false, 'วันที่ไม่ถูกต้อง', 'วันสิ้นสุดต้องไม่ก่อนวันเริ่ม'); return; }
+  const id='D'+Date.now(); S.duties.push({id,uid:'T01',from:d.from,to:d.to,place:d.place.trim(),order:d.order.trim(),file:d.file}); S.newIds.add(id);
+  log('T01','ไปราชการ '+d.place.trim(),'duty','ราชการ');
+  S.draft.duty = {from:TODAY,to:TODAY,place:'',order:'',file:''};
+  renderAll(); flash('#hr-stats');
+  result('teacher', true, 'บันทึกไปราชการแล้ว', 'วันที่ไปราชการไม่ต้องลงเวลามา-กลับ', 'var(--duty)');
+  notify(['hr','exec'], 'ไปราชการ · '+SCHOOL, `ครูพิมพ์ชนก ไปราชการ ${d.place.trim()}`);
+};
+A.dept = el => { const d=el.dataset.d; S.view.hr.open[d] = !S.view.hr.open[d]; renderPhone('hr'); };
+A.afilter = el => { S.view.admin.f = el.dataset.f; renderPhone('admin'); };
+A.aopen = el => { S.view.admin.open = S.view.admin.open===el.dataset.id ? null : el.dataset.id; renderPhone('admin'); };
+A.toggleActive = el => { const s=byId(el.dataset.id); s.active=!s.active; renderAll(); flash('#hr-stats');
+  notify(['hr','exec'], 'ผู้ดูแลระบบ', `${s.active?'เปิดใช้งาน':'ระงับ'}บัญชี ${short(s.name)} แล้ว`); if (s.id==='T01') notify(['teacher'],'ระบบลงเวลา', s.active?'บัญชีของคุณเปิดใช้งานแล้ว':'บัญชีของคุณถูกระงับการใช้งาน'); };
+A.resetFace = el => { const s=byId(el.dataset.id); s.face=false; renderAll(); notify([s.id==='T01'?'teacher':'hr'], 'ผู้ดูแลระบบ', s.id==='T01'?'ใบหน้าของคุณถูกรีเซ็ต กรุณาลงทะเบียนใบหน้าใหม่':`รีเซ็ตใบหน้า ${short(s.name)} แล้ว`); };
+A.sync = () => { S.syncing = true; renderPhone('admin'); setTimeout(()=>{ S.syncing=false; S.synced=S.time; renderPhone('admin'); notify(['hr'],'Google Sheet','ซิงก์ข้อมูลล่าสุดเข้า Google Sheet แล้ว'); }, 1300); };
+A.pdf = el => openPdf(el.dataset.kind);
+const CH = {
+  role: el => { const s=byId(el.dataset.id); s.role=el.value; renderAll(); notify(['hr'],'ผู้ดูแลระบบ',`เปลี่ยนบทบาท ${short(s.name)} เป็น${ROLE_NAME[s.role]}`); },
+  late: el => { S.late=el.value; renderAll(); notify(['teacher','hr'],'ผู้ดูแลระบบ',`ปรับเวลาสายเป็นหลัง ${S.late} น. มีผลกับการลงเวลาครั้งถัดไป`); },
+  radius: el => { S.radius=Number(el.value); renderAll(); notify(['teacher'],'ผู้ดูแลระบบ',`ปรับรัศมีโรงเรียนเป็น ${S.radius} เมตร`); },
+};
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]'); if (t && !t.disabled && A[t.dataset.act]) { if (t.tagName==='SELECT') return; A[t.dataset.act](t); return; }
+  const tm = e.target.closest('[data-time]'); if (tm){ S.time = tm.dataset.time; S.view.teacher.outAsk=false; renderAll(); return; }
+  const lc = e.target.closest('[data-loc]'); if (lc){ S.loc = lc.dataset.loc; renderAll(); return; }
+  const go = e.target.closest('[data-go]'); if (go){ goTo(Number(go.dataset.go)); return; }
+  if (e.target.closest('[data-close]') || e.target.id==='pdfModal') closePdf();
+});
+document.addEventListener('input', e => {
+  const k = e.target.dataset.draft; if (!k) return;
+  if (k==='adminQ'){ S.view.admin.q = e.target.value; renderPhone('admin'); return; }
+  if (k==='outReason'){ S.draft.outReason = e.target.value; return; }
+  const [a,b] = k.split('.'); S.draft[a][b] = e.target.value;
+});
+document.addEventListener('change', e => { const k = e.target.dataset.actChange; if (k && CH[k]) CH[k](e.target); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') closePdf(); });
+document.getElementById('btnReset').onclick = () => { S = fresh(); document.querySelectorAll('.ovl').forEach(o=>o.innerHTML=''); renderAll(); };
+
+// ===================== PDF PREVIEW =====================
+function openPdf(kind){
+  const m = document.getElementById('pdfModal'), p = document.getElementById('pdfPage');
+  const head = t => `<h5>${SCHOOL}</h5><div class="sub">${t}</div>`;
+  const sign = `<div class="sig"><div>ลงชื่อ ...............................................<br>(นางวราภรณ์ ทองดี)<br>เจ้าหน้าที่ฝ่ายบริหารงานบุคคล</div></div>`;
+  if (kind==='daily'){
+    const list = active(), c = counts(list);
+    const rows = list.filter(s=>!['ok','late'].includes(todayStatus(s).k));
+    p.innerHTML = head(`รายงานบุคลากรที่ไม่ได้ลงเวลามาปฏิบัติงาน<br>${thLong(TODAY)} · ข้อมูล ณ ${S.time} น.`) +
+      `<div class="sum"><span>บุคลากรทั้งหมด ${c.total} คน</span><span>มา ${c.ok+c.late} (สาย ${c.late})</span><span>ลา ${c.leave}</span><span>ไปราชการ ${c.duty}</span><span>ยังไม่มา ${c.wait}</span></div>
+      <table><thead><tr><th>ที่</th><th>ชื่อ-สกุล</th><th>กลุ่มสาระ/งาน</th><th>สถานะ</th><th>หมายเหตุ</th></tr></thead><tbody>${rows.map((s,i)=>{const t=todayStatus(s);return `<tr><td>${i+1}</td><td>${esc(s.name)}</td><td>${esc(s.dept)}</td><td>${esc(t.k==='leave'?'ลา':t.label)}</td><td>${esc(t.k==='leave'?t.label:t.note||'')}</td></tr>`}).join('')||'<tr><td colspan="5">มาครบทุกคน</td></tr>'}</tbody></table>` + sign;
+  } else {
+    const rows = deptSummary(); const T = rows.reduce((a,r)=>({n:a.n+r.n,L:a.L+r.L,V:a.V+r.V,D:a.D+r.D,A:a.A+r.A}),{n:0,L:0,V:0,D:0,A:0});
+    p.innerHTML = head(`สรุปการมาปฏิบัติงาน${kind==='org'?'ทั้งองค์กร':'แยกกลุ่มสาระการเรียนรู้/งาน'}<br>ครึ่งปีแรก ปีงบประมาณ ${FY_BE} (1 ต.ค. ${FY_BE-1} – ${thDate(TODAY,{day:'numeric',month:'short',year:'numeric'})})`) +
+      `<table><thead><tr><th>กลุ่มสาระ/งาน</th><th>คน</th><th>มา %</th><th>สาย (ครั้ง)</th><th>ลา (วัน)</th><th>ไปราชการ</th><th>ขาด</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(DEPT_FULL(r.d))}</td><td>${r.n}</td><td>${r.rate.toFixed(1)}</td><td>${r.L}</td><td>${r.V}</td><td>${r.D}</td><td>${r.A}</td></tr>`).join('')}<tr><th>รวม</th><th>${T.n}</th><th></th><th>${T.L}</th><th>${T.V}</th><th>${T.D}</th><th>${T.A}</th></tr></tbody></table>` + sign;
+  }
+  document.getElementById('pdfTitle').textContent = 'ตัวอย่างไฟล์ PDF (A4) ที่ระบบสร้าง';
+  m.hidden = false;
+}
+function closePdf(){ document.getElementById('pdfModal').hidden = true; }
+
+// ===================== CAROUSEL =====================
+const tabsEl = document.getElementById('roleTabs'), dotsEl = document.getElementById('dots');
+tabsEl.innerHTML = ROLES.map((r,i)=>`<button class="rtab" type="button" data-i="${i}"><span class="d"></span>${r.title}</button>`).join('');
+dotsEl.innerHTML = ROLES.map(()=>'<i></i>').join('');
+const perView = () => window.matchMedia('(min-width:760px)').matches ? 2 : 1;
+const slotW = () => track.querySelector('.slot').getBoundingClientRect().width;
+function goTo(i){ const max = ROLES.length - perView(); track.scrollTo({left: Math.max(0,Math.min(i,max))*slotW()}); }
+function curIdx(){ return Math.round(track.scrollLeft / slotW()); }
+function syncTabs(){ const i=curIdx(), pv=perView(); tabsEl.querySelectorAll('.rtab').forEach((b,k)=>b.classList.toggle('on', k>=i && k<i+pv)); dotsEl.querySelectorAll('i').forEach((d,k)=>d.classList.toggle('on', k>=i && k<i+pv));
+  document.getElementById('arL').disabled = i<=0; document.getElementById('arR').disabled = i>=ROLES.length-pv; }
+tabsEl.addEventListener('click', e=>{ const b=e.target.closest('.rtab'); if(b) goTo(Number(b.dataset.i)); });
+document.getElementById('arL').onclick = () => goTo(curIdx()-1);
+document.getElementById('arR').onclick = () => goTo(curIdx()+1);
+let raf; track.addEventListener('scroll', ()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(syncTabs); }, {passive:true});
+window.addEventListener('resize', syncTabs);
+
+renderAll(); syncTabs();
+})();
+</script>
